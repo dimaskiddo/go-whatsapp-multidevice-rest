@@ -1,0 +1,33 @@
+before:
+  hooks:
+    - make vendor
+builds:
+- main: ./cmd/main/main.go
+  env:
+    - CGO_ENABLED=0
+  ldflags:
+    - -s -w
+  goos:
+    - darwin
+    - linux
+    - windows
+  goarch:
+    - 386
+    - amd64
+archives:
+- replacements:
+    darwin: macos
+    linux: linux
+    windows: windows
+    386: 32-bit
+    amd64: 64-bit
+  format: zip
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Version }}_{{ .ShortCommit }}"
+changelog:
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
