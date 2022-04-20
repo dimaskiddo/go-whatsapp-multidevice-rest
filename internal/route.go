@@ -7,29 +7,37 @@ import (
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/auth"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 
-	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/index"
-	indexAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/index/auth"
-	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/whatsapp"
+	ctlAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth"
+	typAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth/types"
+
+	ctlIndex "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/index"
+	ctlWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/whatsapp"
 )
 
 func Routes(e *echo.Echo) {
 	// Route for Index
 	// ---------------------------------------------
-	e.GET(router.BaseURL, index.Index)
-	e.GET(router.BaseURL+"/auth", index.Auth, auth.BasicAuth())
+	e.GET(router.BaseURL, ctlIndex.Index)
+
+	// Route for Auth
+	// ---------------------------------------------
+	e.GET(router.BaseURL+"/auth", ctlAuth.Auth, auth.BasicAuth())
 
 	// Route for WhatsApp
 	// ---------------------------------------------
 	authJWTConfig := middleware.JWTConfig{
-		Claims:     &indexAuth.AuthJWTClaims{},
+		Claims:     &typAuth.AuthJWTClaims{},
 		SigningKey: []byte(auth.AuthJWTSecret),
 	}
 
-	e.POST(router.BaseURL+"/login", whatsapp.Login, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/text", whatsapp.SendText, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/location", whatsapp.SendLocation, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/document", whatsapp.SendDocument, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/audio", whatsapp.SendAudio, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/image", whatsapp.SendImage, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/send/video", whatsapp.SendVideo, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/login", ctlWhatsApp.Login, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/send/text", ctlWhatsApp.SendText, middleware.JWTWithConfig(authJWTConfig))
+	/*
+		  e.POST(router.BaseURL+"/send/location", ctlWhatsApp.SendLocation, middleware.JWTWithConfig(authJWTConfig))
+			e.POST(router.BaseURL+"/send/document", ctlWhatsApp.SendDocument, middleware.JWTWithConfig(authJWTConfig))
+			e.POST(router.BaseURL+"/send/audio", ctlWhatsApp.SendAudio, middleware.JWTWithConfig(authJWTConfig))
+			e.POST(router.BaseURL+"/send/image", ctlWhatsApp.SendImage, middleware.JWTWithConfig(authJWTConfig))
+		  e.POST(router.BaseURL+"/send/video", ctlWhatsApp.SendVideo, middleware.JWTWithConfig(authJWTConfig))
+	*/
+	e.POST(router.BaseURL+"/logout", ctlWhatsApp.Logout, middleware.JWTWithConfig(authJWTConfig))
 }

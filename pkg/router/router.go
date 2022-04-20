@@ -10,7 +10,7 @@ var GZipLevel int
 func init() {
 	var err error
 
-	BaseURL, err = env.GetEnvString("API_BASE_URL")
+	BaseURL, err = env.GetEnvString("HTTP_BASE_URL")
 	if err != nil {
 		BaseURL = "/"
 	}
@@ -27,6 +27,6 @@ func init() {
 
 	GZipLevel, err = env.GetEnvInt("HTTP_GZIP_LEVEL")
 	if err != nil {
-		GZipLevel = 3
+		GZipLevel = 1
 	}
 }

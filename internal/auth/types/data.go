@@ -1,4 +1,4 @@
-package model
+package types
 
 import (
 	"github.com/golang-jwt/jwt"
@@ -10,5 +10,5 @@ type AuthJWTClaims struct {
 }
 
 type AuthJWTClaimsPayload struct {
-	MSISDN string `json:"msisdn"`
+	JID string `json:"jid"`
 }

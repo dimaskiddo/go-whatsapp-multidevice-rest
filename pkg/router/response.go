@@ -80,6 +80,11 @@ func ResponseSuccessWithData(c echo.Context, message string, data interface{}) e
 	return c.JSON(response.Code, response)
 }
 
+func ResponseSuccessWithHTML(c echo.Context, html string) error {
+	logSuccess(c, http.StatusOK, http.StatusText(http.StatusOK))
+	return c.HTML(http.StatusOK, html)
+}
+
 func ResponseCreated(c echo.Context, message string) error {
 	var response ResSuccess
 
