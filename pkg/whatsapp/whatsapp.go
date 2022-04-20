@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	qrCode "github.com/skip2/go-qrcode"
@@ -38,7 +39,7 @@ func WhatsAppInit(jid string) (*whatsmeow.Client, error) {
 	}
 
 	// Set Client Properties
-	store.CompanionProps.Os = proto.String("Go WhatsApp MultiDevice REST")
+	store.CompanionProps.Os = proto.String("Go WhatsApp Multi-Device REST")
 	store.CompanionProps.PlatformType = waproto.CompanionProps_DESKTOP.Enum()
 
 	// Create New Client Connection
@@ -63,9 +64,9 @@ func WhatAppConnect(jid string) error {
 	return nil
 }
 
-func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, string) {
+func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, int) {
 	qrChanCode := make(chan string)
-	qrChanTimeout := make(chan string)
+	qrChanTimeout := make(chan int)
 	qrChanBase64 := make(chan string)
 
 	// Get QR Code Data and Timeout
@@ -73,7 +74,7 @@ func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, string) 
 		for evt := range qrChan {
 			if evt.Event == "code" {
 				qrChanCode <- evt.Code
-				qrChanTimeout <- evt.Timeout.String()
+				qrChanTimeout <- int(evt.Timeout.Seconds())
 			}
 		}
 	}()
@@ -91,7 +92,7 @@ func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, string) 
 	return <-qrChanBase64, <-qrChanTimeout
 }
 
-func WhatsAppLogin(jid string) (string, string, error) {
+func WhatsAppLogin(jid string) (string, int, error) {
 	if WhatsAppClient[jid] != nil {
 		// Make Sure WebSocket Connection is Disconnected
 		WhatsAppClient[jid].Disconnect()
@@ -104,7 +105,7 @@ func WhatsAppLogin(jid string) (string, string, error) {
 			// Connect WebSocket while Initialize QR Code Data to be Sent
 			err := WhatsAppClient[jid].Connect()
 			if err != nil {
-				return "", "", err
+				return "", 0, err
 			}
 
 			// Get Generated QR Code and Timeout Information
@@ -117,13 +118,13 @@ func WhatsAppLogin(jid string) (string, string, error) {
 			// Reconnect WebSocket
 			err := WhatsAppClient[jid].Connect()
 			if err != nil {
-				return "", "", err
+				return "", 0, err
 			}
 		}
 	}
 
-	// Return Error WhatsApp Client is Not Valid
-	return "", "", errors.New("WhatsApp Client is not Valid")
+	// Return Error WhatsApp Client is not Valid
+	return "", 0, errors.New("WhatsApp Client is not Valid")
 }
 
 func WhatsAppLogout(jid string) error {
@@ -144,33 +145,60 @@ func WhatsAppLogout(jid string) error {
 		return nil
 	}
 
-	// Return Error WhatsApp Client is Not Valid
+	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppCreateUserJID(jid string) types.JID {
-	return types.NewJID(jid, types.DefaultUserServer)
-}
+func WhatsAppComposeJID(jid string) types.JID {
+	// Check if JID Contains '@' Symbol
+	if strings.ContainsRune(jid, '@') {
+		// Split JID Based on '@' Symbol
+		// and Get Only The First Section Before The Symbol
+		buffers := strings.Split(jid, "@")
+		jid = buffers[0]
+	}
 
-func WhatsAppCreateGroupJID(gjid string) types.JID {
-	return types.NewJID(gjid, types.GroupServer)
+	// Check if JID First Chracter is '+' Symbol
+	if jid[0] == '+' {
+		// Remove '+' Symbol from JID
+		jid = jid[1:]
+	}
+
+	// Check if JID Contains '-' Symbol
+	if strings.ContainsRune(jid, '-') {
+		// Check if the JID is a Group ID
+		if len(strings.SplitN(jid, "-", 2)) == 2 {
+			// Return JID as Group Server (@g.us)
+			return types.NewJID(jid, types.GroupServer)
+		}
+	}
+
+	// Return JID as Default User Server (@s.whatsapp.net)
+	return types.NewJID(jid, types.DefaultUserServer)
 }
 
 func WhatsAppSendText(jid string, rjid string, message string) error {
 	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client WebSocket is Connected and Logged In
 		if WhatsAppClient[jid].IsConnected() && WhatsAppClient[jid].IsLoggedIn() {
-			_, err := WhatsAppClient[jid].SendMessage(WhatsAppCreateUserJID(rjid), "", &waproto.Message{
+			// Compose WhatsApp Proto
+			content := &waproto.Message{
 				Conversation: proto.String(message),
-			})
+			}
 
+			// Send WhatsApp Message Proto
+			_, err := WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
 			if err != nil {
 				return err
 			}
 
 			return nil
 		}
+
+		// Return Error WhatsApp Client is not Connected or Logged In
+		return errors.New("WhatsApp Client is not Connected or Logged In")
 	}
 
-	// Return Error WhatsApp Client is Not Valid
+	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
 }

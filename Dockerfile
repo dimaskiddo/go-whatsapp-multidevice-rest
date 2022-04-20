@@ -21,6 +21,7 @@ ENV PATH $PATH:/usr/app/${SERVICE_NAME}
 
 WORKDIR /usr/app/${SERVICE_NAME}
 
+COPY --from=go-builder /usr/src/app/.env.production ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 
 EXPOSE 3000

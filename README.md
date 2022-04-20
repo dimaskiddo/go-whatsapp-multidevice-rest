@@ -40,6 +40,7 @@ make vendor
 ```
 * Until this step you already can run this code by using this command
 ```
+ln -sf .env.development .env
 make run
 ```
 

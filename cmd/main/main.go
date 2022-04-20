@@ -13,11 +13,17 @@ import (
 
 	"github.com/go-playground/validator/v10"
 
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal"
 )
+
+type Server struct {
+	Address string
+	Port    string
+}
 
 type EchoValidator struct {
 	Validator *validator.Validate
@@ -28,6 +34,8 @@ func (ev *EchoValidator) Validate(i interface{}) error {
 }
 
 func main() {
+	var err error
+
 	// Initialize Echo
 	e := echo.New()
 
@@ -70,12 +78,28 @@ func main() {
 	e.HTTPErrorHandler = router.HttpErrorHandler
 	e.GET("/favicon.ico", router.ResponseNoContent)
 
-	// Router Load Routes
+	// Load Internal Routes
 	internal.Routes(e)
+
+	// Running Startup Tasks
+	internal.Startup()
+
+	// Get Server Configuration
+	var serverConfig Server
+
+	serverConfig.Address, err = env.GetEnvString("SERVER_ADDRESS")
+	if err != nil {
+		serverConfig.Address = "127.0.0.1"
+	}
+
+	serverConfig.Port, err = env.GetEnvString("SERVER_PORT")
+	if err != nil {
+		serverConfig.Port = "3000"
+	}
 
 	// Start Server
 	go func() {
-		err := e.Start(":3000")
+		err := e.Start(serverConfig.Address + ":" + serverConfig.Port)
 		if err != nil && err != http.ErrServerClosed {
 			log.Print(nil).Fatal(err.Error())
 		}
@@ -87,12 +111,12 @@ func main() {
 	signal.Notify(sigShutdown, syscall.SIGTERM)
 	<-sigShutdown
 
-	// Wait 5 Seconds for Graceful Shutdown
-	ctx, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelShutdown()
+	// Wait 5 Seconds Before Graceful Shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	// Try To Shutdown Server
-	err := e.Shutdown(ctx)
+	err = e.Shutdown(ctx)
 	if err != nil {
 		log.Print(nil).Fatal(err.Error())
 	}

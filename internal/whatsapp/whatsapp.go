@@ -1,6 +1,9 @@
 package whatsapp
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 
@@ -22,9 +25,9 @@ func Login(c echo.Context) error {
 	jid := jwtPayload(c).JID
 
 	var reqLogin typWhatsApp.RequestLogin
-	reqLogin.Output = c.FormValue("output")
+	reqLogin.Output = strings.TrimSpace(c.FormValue("output"))
 
-	if reqLogin.Output == "" {
+	if len(reqLogin.Output) == 0 {
 		reqLogin.Output = "html"
 	}
 
@@ -46,14 +49,14 @@ func Login(c echo.Context) error {
 		htmlContent := `
     <html>
       <head>
-        <title>WhatsApp MultiDevice Login</title>
+        <title>WhatsApp Multi-Device Login</title>
       </head>
       <body>
         <img src="` + resLogin.QRCode + `" />
         <p>
           <b>QR Code Scan</b>
           <br/>
-          Timeout in ` + resLogin.Timeout + `
+          Timeout in ` + strconv.Itoa(resLogin.Timeout) + ` Second(s)
         </p>
       </body>
     </html>`
@@ -79,8 +82,12 @@ func SendText(c echo.Context) error {
 	jid := jwtPayload(c).JID
 
 	var reqSendMessage typWhatsApp.RequestSendMessage
-	reqSendMessage.RJID = c.FormValue("msisdn")
-	reqSendMessage.Message = c.FormValue("message")
+	reqSendMessage.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqSendMessage.Message = strings.TrimSpace(c.FormValue("message"))
+
+	if len(reqSendMessage.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
 
 	err := pkgWhatsApp.WhatsAppSendText(jid, reqSendMessage.RJID, reqSendMessage.Message)
 	if err != nil {
