@@ -1,6 +1,6 @@
 # Builder Image
 # ---------------------------------------------------
-FROM dimaskiddo/alpine:go-1.17 AS go-builder
+FROM dimaskiddo/debian-buster:go-1.17 AS go-builder
 
 WORKDIR /usr/src/app
 
@@ -12,7 +12,7 @@ RUN go mod download \
 
 # Final Image
 # ---------------------------------------------------
-FROM dimaskiddo/alpine:base
+FROM dimaskiddo/debian-buster:base
 MAINTAINER Dimas Restu Hidayanto <dimas.restu@student.upi.edu>
 
 ARG SERVICE_NAME="go-whatsapp-multidevice-rest"
@@ -21,9 +21,12 @@ ENV PATH $PATH:/usr/app/${SERVICE_NAME}
 
 WORKDIR /usr/app/${SERVICE_NAME}
 
+RUN mkdir -p dbs \
+    && chmod 755 dbs
 COPY --from=go-builder /usr/src/app/.env.production ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 
 EXPOSE 3000
 
+VOLUME ["/usr/app/${SERVICE_NAME}/dbs"]
 CMD ["main"]
