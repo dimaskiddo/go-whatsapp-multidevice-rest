@@ -22,6 +22,7 @@ func jwtPayload(c echo.Context) typAuth.AuthJWTClaimsPayload {
 }
 
 func Login(c echo.Context) error {
+	var err error
 	jid := jwtPayload(c).JID
 
 	var reqLogin typWhatsApp.RequestLogin
@@ -31,7 +32,7 @@ func Login(c echo.Context) error {
 		reqLogin.Output = "html"
 	}
 
-	err := pkgWhatsApp.WhatAppConnect(jid)
+	err = pkgWhatsApp.WhatAppConnect(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -72,9 +73,10 @@ func Login(c echo.Context) error {
 }
 
 func Logout(c echo.Context) error {
+	var err error
 	jid := jwtPayload(c).JID
 
-	err := pkgWhatsApp.WhatsAppLogout(jid)
+	err = pkgWhatsApp.WhatsAppLogout(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -83,6 +85,7 @@ func Logout(c echo.Context) error {
 }
 
 func SendText(c echo.Context) error {
+	var err error
 	jid := jwtPayload(c).JID
 
 	var reqSendMessage typWhatsApp.RequestSendMessage
@@ -93,7 +96,7 @@ func SendText(c echo.Context) error {
 		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
 	}
 
-	err := pkgWhatsApp.WhatsAppSendText(jid, reqSendMessage.RJID, reqSendMessage.Message)
+	err = pkgWhatsApp.WhatsAppSendText(jid, reqSendMessage.RJID, reqSendMessage.Message)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -101,15 +104,40 @@ func SendText(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Send Text Message")
 }
 
+func SendLocation(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqSendLocation typWhatsApp.RequestSendLocation
+	reqSendLocation.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+
+	reqSendLocation.Latitude, err = strconv.ParseFloat(strings.TrimSpace(c.FormValue("latitude")), 64)
+	if err != nil {
+		return router.ResponseInternalError(c, "Error While Decoding Latitude to Float64")
+	}
+
+	reqSendLocation.Longitude, err = strconv.ParseFloat(strings.TrimSpace(c.FormValue("longitude")), 64)
+	if err != nil {
+		return router.ResponseInternalError(c, "Error While Decoding Longitude to Float64")
+	}
+
+	if len(reqSendLocation.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	err = pkgWhatsApp.WhatsAppSendLocation(jid, reqSendLocation.RJID, reqSendLocation.Latitude, reqSendLocation.Longitude)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Send Location Message")
+}
+
 /*
   TODO: Send Media
 */
 
 /*
-func SendLocation(c echo.Context) error {
-	return router.ResponseSuccess(c, "Successfully Send Location Message")
-}
-
 func SendDocument(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Send Document Message")
 }

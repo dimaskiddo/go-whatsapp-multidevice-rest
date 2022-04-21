@@ -240,3 +240,32 @@ func WhatsAppSendText(jid string, rjid string, message string) error {
 	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
 }
+
+func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude float64) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			LocationMessage: &waproto.LocationMessage{
+				DegreesLatitude:  proto.Float64(latitude),
+				DegreesLongitude: proto.Float64(longitude),
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
