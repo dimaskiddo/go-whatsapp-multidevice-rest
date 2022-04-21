@@ -149,6 +149,20 @@ func WhatsAppLogout(jid string) error {
 	return errors.New("WhatsApp Client is not Valid")
 }
 
+func WhatsAppClientIsOK(jid string) error {
+	// Make Sure WhatsApp Client is Connected
+	if !WhatsAppClient[jid].IsConnected() {
+		return errors.New("WhatsApp Client is not Connected")
+	}
+
+	// Make Sure WhatsApp Client is Logged In
+	if !WhatsAppClient[jid].IsLoggedIn() {
+		return errors.New("WhatsApp Client is not Logged In")
+	}
+
+	return nil
+}
+
 func WhatsAppComposeJID(jid string) types.JID {
 	// Check if JID Contains '@' Symbol
 	if strings.ContainsRune(jid, '@') {
@@ -158,7 +172,7 @@ func WhatsAppComposeJID(jid string) types.JID {
 		jid = buffers[0]
 	}
 
-	// Check if JID First Chracter is '+' Symbol
+	// Check if JID First Character is '+' Symbol
 	if jid[0] == '+' {
 		// Remove '+' Symbol from JID
 		jid = jid[1:]
@@ -179,24 +193,24 @@ func WhatsAppComposeJID(jid string) types.JID {
 
 func WhatsAppSendText(jid string, rjid string, message string) error {
 	if WhatsAppClient[jid] != nil {
-		// Make Sure WhatsApp Client WebSocket is Connected and Logged In
-		if WhatsAppClient[jid].IsConnected() && WhatsAppClient[jid].IsLoggedIn() {
-			// Compose WhatsApp Proto
-			content := &waproto.Message{
-				Conversation: proto.String(message),
-			}
-
-			// Send WhatsApp Message Proto
-			_, err := WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
-			if err != nil {
-				return err
-			}
-
-			return nil
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
 		}
 
-		// Return Error WhatsApp Client is not Connected or Logged In
-		return errors.New("WhatsApp Client is not Connected or Logged In")
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			Conversation: proto.String(message),
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
