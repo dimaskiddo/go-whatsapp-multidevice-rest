@@ -116,15 +116,39 @@ func WhatsAppLogin(jid string) (string, int, error) {
 		} else {
 			// Device ID is Exist
 			// Reconnect WebSocket
-			err := WhatsAppClient[jid].Connect()
+			err := WhatsAppReconnect(jid)
 			if err != nil {
 				return "", 0, err
 			}
+
+			return "WhatsApp Client is Reconnected", 0, nil
 		}
 	}
 
 	// Return Error WhatsApp Client is not Valid
 	return "", 0, errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppReconnect(jid string) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WebSocket Connection is Disconnected
+		WhatsAppClient[jid].Disconnect()
+
+		// Make Sure Store ID is not Empty
+		// To do Reconnection
+		if WhatsAppClient[jid].Store.ID != nil {
+			err := WhatsAppClient[jid].Connect()
+			if err != nil {
+				return err
+			}
+
+			return nil
+		}
+
+		return errors.New("WhatsApp Client Store ID is Empty, Please Re-Login and Scan QR Code Again")
+	}
+
+	return errors.New("WhatsApp Client is not Valid")
 }
 
 func WhatsAppLogout(jid string) error {

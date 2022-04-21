@@ -41,6 +41,10 @@ func Login(c echo.Context) error {
 		return router.ResponseInternalError(c, err.Error())
 	}
 
+	if qrCodeImage == "WhatsApp Client is Reconnected" {
+		return router.ResponseSuccess(c, qrCodeImage)
+	}
+
 	var resLogin typWhatsApp.ResponseLogin
 	resLogin.QRCode = qrCodeImage
 	resLogin.Timeout = qrCodeTimeout
