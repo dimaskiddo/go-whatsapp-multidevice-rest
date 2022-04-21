@@ -37,7 +37,7 @@ func convertFileToBuffer(file multipart.File) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func sendContent(c echo.Context, mediaType string) error {
+func sendMedia(c echo.Context, mediaType string) error {
 	var err error
 	jid := jwtPayload(c).JID
 
@@ -226,17 +226,17 @@ func SendLocation(c echo.Context) error {
 }
 
 func SendDocument(c echo.Context) error {
-	return sendContent(c, "document")
+	return sendMedia(c, "document")
 }
 
 func SendImage(c echo.Context) error {
-	return sendContent(c, "image")
+	return sendMedia(c, "image")
 }
 
 func SendAudio(c echo.Context) error {
-	return sendContent(c, "audio")
+	return sendMedia(c, "audio")
 }
 
 func SendVideo(c echo.Context) error {
-	return sendContent(c, "video")
+	return sendMedia(c, "video")
 }
