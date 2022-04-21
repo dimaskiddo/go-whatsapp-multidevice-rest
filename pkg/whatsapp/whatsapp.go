@@ -317,7 +317,7 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 			return err
 		}
 
-		// Upload File to WhatsApp Storage Server
+		// Upload Image to WhatsApp Storage Server
 		imageUploaded, err := WhatsAppClient[jid].Upload(context.Background(), imageBytes, whatsmeow.MediaImage)
 
 		// Compose WhatsApp Proto
@@ -355,7 +355,7 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 			return err
 		}
 
-		// Upload File to WhatsApp Storage Server
+		// Upload Audio to WhatsApp Storage Server
 		audioUploaded, err := WhatsAppClient[jid].Upload(context.Background(), audioBytes, whatsmeow.MediaAudio)
 
 		// Compose WhatsApp Proto
@@ -368,6 +368,44 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 				FileSha256:    audioUploaded.FileSHA256,
 				FileEncSha256: audioUploaded.FileEncSHA256,
 				MediaKey:      audioUploaded.MediaKey,
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Upload Video to WhatsApp Storage Server
+		videoUploaded, err := WhatsAppClient[jid].Upload(context.Background(), videoBytes, whatsmeow.MediaVideo)
+
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			VideoMessage: &waproto.VideoMessage{
+				Url:           proto.String(videoUploaded.URL),
+				DirectPath:    proto.String(videoUploaded.DirectPath),
+				Mimetype:      proto.String(videoType),
+				Caption:       proto.String(videoCaption),
+				FileLength:    proto.Uint64(videoUploaded.FileLength),
+				FileSha256:    videoUploaded.FileSHA256,
+				FileEncSha256: videoUploaded.FileEncSHA256,
+				MediaKey:      videoUploaded.MediaKey,
 			},
 		}
 

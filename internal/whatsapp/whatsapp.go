@@ -59,6 +59,10 @@ func sendContent(c echo.Context, mediaType string) error {
 
 	case "audio":
 		fileStream, fileHeader, err = c.Request().FormFile("audio")
+
+	case "video":
+		fileStream, fileHeader, err = c.Request().FormFile("video")
+		reqSendMessage.Message = strings.TrimSpace(c.FormValue("caption"))
 	}
 
 	// Don't Forget to Close The File Stream
@@ -95,6 +99,9 @@ func sendContent(c echo.Context, mediaType string) error {
 
 	case "audio":
 		err = pkgWhatsApp.WhatsAppSendAudio(jid, reqSendMessage.RJID, fileBytes, fileType)
+
+	case "video":
+		err = pkgWhatsApp.WhatsAppSendVideo(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
 	}
 
 	// Return Internal Server Error
@@ -230,12 +237,6 @@ func SendAudio(c echo.Context) error {
 	return sendContent(c, "audio")
 }
 
-/*
-  TODO: Send Media
-*/
-
-/*
 func SendVideo(c echo.Context) error {
-	return router.ResponseSuccess(c, "Successfully Send Video Message")
+	return sendContent(c, "video")
 }
-*/
