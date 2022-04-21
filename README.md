@@ -58,7 +58,7 @@ The build result will shown in build directory
 
 ## API Access
 
-You can access any endpoint under **API_BASE_URL** environment variable which by default located at */*.
+You can access any endpoint under **BASE_URL** environment variable which by default located at *.env* file.
 
 ## Built With
 

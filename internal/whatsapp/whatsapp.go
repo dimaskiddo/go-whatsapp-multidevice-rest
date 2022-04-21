@@ -1,6 +1,9 @@
 package whatsapp
 
 import (
+	"bytes"
+	"io"
+	"mime/multipart"
 	"strconv"
 	"strings"
 
@@ -19,6 +22,72 @@ func jwtPayload(c echo.Context) typAuth.AuthJWTClaimsPayload {
 	jwtClaims := jwtToken.Claims.(*typAuth.AuthJWTClaims)
 
 	return jwtClaims.Data
+}
+
+func convertFileToBuffer(file multipart.File) ([]byte, error) {
+	buffer := bytes.NewBuffer(nil)
+	_, err := io.Copy(buffer, file)
+	if err != nil {
+		return bytes.NewBuffer(nil).Bytes(), err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func sendContent(c echo.Context, mediaType string) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqSendMessage typWhatsApp.RequestSendMessage
+	reqSendMessage.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+
+	// Read Uploaded File Based on Send Media Type
+	var fileStream multipart.File
+	var fileHeader *multipart.FileHeader
+
+	switch mediaType {
+	case "document":
+		fileStream, fileHeader, err = c.Request().FormFile("document")
+		reqSendMessage.Message = fileHeader.Filename
+	}
+
+	// Don't Forget to Close The File Stream
+	defer fileStream.Close()
+
+	// Get Uploaded File MIME Type
+	fileType := fileHeader.Header.Get("Content-Type")
+
+	// If There are Some Errors While Opeening The File Stream
+	// Return Bad Request with Original Error Message
+	if err != nil {
+		return router.ResponseBadRequest(c, err.Error())
+	}
+
+	// Make Sure RJID is Filled
+	if len(reqSendMessage.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	// Convert File Stream in to Bytes
+	// Since WhatsApp Proto for Media is only Accepting Bytes format
+	fileBytes, err := convertFileToBuffer(fileStream)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	// Send Media Message Based on Media Type
+	switch mediaType {
+	case "document":
+		err = pkgWhatsApp.WhatsAppSendDocument(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+	}
+
+	// Return Internal Server Error
+	// When Detected There are Some Errors While Sending The Media Message
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Send Media Message")
 }
 
 func Login(c echo.Context) error {
@@ -133,15 +202,15 @@ func SendLocation(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Send Location Message")
 }
 
+func SendDocument(c echo.Context) error {
+	return sendContent(c, "document")
+}
+
 /*
   TODO: Send Media
 */
 
 /*
-func SendDocument(c echo.Context) error {
-	return router.ResponseSuccess(c, "Successfully Send Document Message")
-}
-
 func SendImage(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Send Image Message")
 }

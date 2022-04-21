@@ -269,3 +269,42 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
 }
+
+func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType string, fileName string) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Upload File to WhatsApp Storage Server
+		fileUploaded, err := WhatsAppClient[jid].Upload(context.Background(), fileBytes, whatsmeow.MediaDocument)
+
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			DocumentMessage: &waproto.DocumentMessage{
+				Url:           proto.String(fileUploaded.URL),
+				DirectPath:    proto.String(fileUploaded.DirectPath),
+				Mimetype:      proto.String(fileType),
+				Title:         proto.String(fileName),
+				FileName:      proto.String(fileName),
+				FileLength:    proto.Uint64(fileUploaded.FileLength),
+				FileSha256:    fileUploaded.FileSHA256,
+				FileEncSha256: fileUploaded.FileEncSHA256,
+				MediaKey:      fileUploaded.MediaKey,
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
