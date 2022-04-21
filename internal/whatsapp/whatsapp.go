@@ -25,7 +25,10 @@ func jwtPayload(c echo.Context) typAuth.AuthJWTClaimsPayload {
 }
 
 func convertFileToBuffer(file multipart.File) ([]byte, error) {
+	// Create Empty Buffer
 	buffer := bytes.NewBuffer(nil)
+
+	// Copy File Stream to Buffer
 	_, err := io.Copy(buffer, file)
 	if err != nil {
 		return bytes.NewBuffer(nil).Bytes(), err
@@ -49,6 +52,13 @@ func sendContent(c echo.Context, mediaType string) error {
 	case "document":
 		fileStream, fileHeader, err = c.Request().FormFile("document")
 		reqSendMessage.Message = fileHeader.Filename
+
+	case "image":
+		fileStream, fileHeader, err = c.Request().FormFile("image")
+		reqSendMessage.Message = strings.TrimSpace(c.FormValue("caption"))
+
+	case "audio":
+		fileStream, fileHeader, err = c.Request().FormFile("audio")
 	}
 
 	// Don't Forget to Close The File Stream
@@ -79,6 +89,12 @@ func sendContent(c echo.Context, mediaType string) error {
 	switch mediaType {
 	case "document":
 		err = pkgWhatsApp.WhatsAppSendDocument(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+
+	case "image":
+		err = pkgWhatsApp.WhatsAppSendImage(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+
+	case "audio":
+		err = pkgWhatsApp.WhatsAppSendAudio(jid, reqSendMessage.RJID, fileBytes, fileType)
 	}
 
 	// Return Internal Server Error
@@ -206,19 +222,19 @@ func SendDocument(c echo.Context) error {
 	return sendContent(c, "document")
 }
 
+func SendImage(c echo.Context) error {
+	return sendContent(c, "image")
+}
+
+func SendAudio(c echo.Context) error {
+	return sendContent(c, "audio")
+}
+
 /*
   TODO: Send Media
 */
 
 /*
-func SendImage(c echo.Context) error {
-	return router.ResponseSuccess(c, "Successfully Send Image Message")
-}
-
-func SendAudio(c echo.Context) error {
-	return router.ResponseSuccess(c, "Successfully Send Audio Message")
-}
-
 func SendVideo(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Send Video Message")
 }

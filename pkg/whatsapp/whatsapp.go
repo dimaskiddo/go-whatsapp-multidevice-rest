@@ -308,3 +308,78 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
 }
+
+func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Upload File to WhatsApp Storage Server
+		imageUploaded, err := WhatsAppClient[jid].Upload(context.Background(), imageBytes, whatsmeow.MediaImage)
+
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			ImageMessage: &waproto.ImageMessage{
+				Url:           proto.String(imageUploaded.URL),
+				DirectPath:    proto.String(imageUploaded.DirectPath),
+				Mimetype:      proto.String(imageType),
+				Caption:       proto.String(imageCaption),
+				FileLength:    proto.Uint64(imageUploaded.FileLength),
+				FileSha256:    imageUploaded.FileSHA256,
+				FileEncSha256: imageUploaded.FileEncSHA256,
+				MediaKey:      imageUploaded.MediaKey,
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType string) error {
+	if WhatsAppClient[jid] != nil {
+		// Make Sure WhatsApp Client is OK
+		err := WhatsAppClientIsOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Upload File to WhatsApp Storage Server
+		audioUploaded, err := WhatsAppClient[jid].Upload(context.Background(), audioBytes, whatsmeow.MediaAudio)
+
+		// Compose WhatsApp Proto
+		content := &waproto.Message{
+			AudioMessage: &waproto.AudioMessage{
+				Url:           proto.String(audioUploaded.URL),
+				DirectPath:    proto.String(audioUploaded.DirectPath),
+				Mimetype:      proto.String(audioType),
+				FileLength:    proto.Uint64(audioUploaded.FileLength),
+				FileSha256:    audioUploaded.FileSHA256,
+				FileEncSha256: audioUploaded.FileEncSHA256,
+				MediaKey:      audioUploaded.MediaKey,
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
