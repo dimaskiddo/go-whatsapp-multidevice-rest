@@ -23,14 +23,26 @@ func Auth(c echo.Context) error {
 	_ = json.NewDecoder(c.Request().Body).Decode(&reqAuthBasicInfo)
 
 	// Create JWT Claims
-	jwtClaims := &typAuth.AuthJWTClaims{
-		typAuth.AuthJWTClaimsPayload{
-			JID: reqAuthBasicInfo.Username,
-		},
-		jwt.StandardClaims{
-			IssuedAt:  time.Now().Unix(),
-			ExpiresAt: time.Now().Add(time.Hour * time.Duration(auth.AuthJWTExpiredHour)).Unix(),
-		},
+	var jwtClaims *typAuth.AuthJWTClaims
+	if auth.AuthJWTExpiredHour > 0 {
+		jwtClaims = &typAuth.AuthJWTClaims{
+			typAuth.AuthJWTClaimsPayload{
+				JID: reqAuthBasicInfo.Username,
+			},
+			jwt.StandardClaims{
+				IssuedAt:  time.Now().Unix(),
+				ExpiresAt: time.Now().Add(time.Hour * time.Duration(auth.AuthJWTExpiredHour)).Unix(),
+			},
+		}
+	} else {
+		jwtClaims = &typAuth.AuthJWTClaims{
+			typAuth.AuthJWTClaimsPayload{
+				JID: reqAuthBasicInfo.Username,
+			},
+			jwt.StandardClaims{
+				IssuedAt: time.Now().Unix(),
+			},
+		}
 	}
 
 	// Create JWT Token
