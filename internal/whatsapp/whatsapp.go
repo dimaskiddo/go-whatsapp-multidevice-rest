@@ -24,7 +24,7 @@ func jwtPayload(c echo.Context) typAuth.AuthJWTClaimsPayload {
 	return jwtClaims.Data
 }
 
-func convertFileToBuffer(file multipart.File) ([]byte, error) {
+func convertFileToBytes(file multipart.File) ([]byte, error) {
 	// Create Empty Buffer
 	buffer := bytes.NewBuffer(nil)
 
@@ -84,7 +84,7 @@ func sendMedia(c echo.Context, mediaType string) error {
 
 	// Convert File Stream in to Bytes
 	// Since WhatsApp Proto for Media is only Accepting Bytes format
-	fileBytes, err := convertFileToBuffer(fileStream)
+	fileBytes, err := convertFileToBytes(fileStream)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
