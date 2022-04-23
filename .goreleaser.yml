@@ -22,6 +22,9 @@ archives:
     386: 32-bit
     amd64: 64-bit
   format: zip
+  files:
+    - README.md
+    - dbs/*
 checksum:
   name_template: 'checksums.txt'
 snapshot:
