@@ -23,18 +23,14 @@ var WhatsAppDatastore *sqlstore.Container
 var WhatsAppClient = make(map[string]*whatsmeow.Client)
 
 func init() {
-	WhatsAppInitDB()
-}
-
-func WhatsAppInitDB() {
 	var err error
 
-	dbType, err := env.GetEnvString("WHATSAPP_DB_TYPE")
+	dbType, err := env.GetEnvString("WHATSAPP_DATASTORE_TYPE")
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore Type")
 	}
 
-	dbURI, err := env.GetEnvString("WHATSAPP_DB_URI")
+	dbURI, err := env.GetEnvString("WHATSAPP_DATASTORE_URI")
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore URI")
 	}
@@ -47,7 +43,7 @@ func WhatsAppInitDB() {
 	WhatsAppDatastore = datastore
 }
 
-func WhatsAppInitClient(device *store.Device, jid string) error {
+func WhatsAppInitClient(device *store.Device, jid string) {
 	if WhatsAppClient[jid] == nil {
 		if device == nil {
 			// Initialize New WhatsApp Client Device in Datastore
@@ -62,8 +58,6 @@ func WhatsAppInitClient(device *store.Device, jid string) error {
 		// And Save it to The Map
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 	}
-
-	return nil
 }
 
 func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, int) {

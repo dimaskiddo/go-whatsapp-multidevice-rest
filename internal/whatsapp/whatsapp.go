@@ -125,10 +125,7 @@ func Login(c echo.Context) error {
 	}
 
 	// Initialize WhatsApp Client
-	err = pkgWhatsApp.WhatsAppInitClient(nil, jid)
-	if err != nil {
-		return router.ResponseInternalError(c, err.Error())
-	}
+	pkgWhatsApp.WhatsAppInitClient(nil, jid)
 
 	// Get WhatsApp QR Code Image
 	qrCodeImage, qrCodeTimeout, err := pkgWhatsApp.WhatsAppLogin(jid)
