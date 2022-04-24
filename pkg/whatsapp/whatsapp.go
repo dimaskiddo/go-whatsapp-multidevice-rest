@@ -4,10 +4,8 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
-	"fmt"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	qrCode "github.com/skip2/go-qrcode"
 	"google.golang.org/protobuf/proto"
 
@@ -16,66 +14,53 @@ import (
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
+
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
 
+var WhatsAppDatastore *sqlstore.Container
 var WhatsAppClient = make(map[string]*whatsmeow.Client)
 
-func WhatsAppDB(dbType string) (*sqlstore.Container, error) {
-	var dbName, dbURI string
+func init() {
+	WhatsAppInitDB()
+}
 
-	switch dbType {
-	case "sqlite3":
-		// Prepare SQLite Database and Connection URI
-		dbName = "dbs/WhatsApp.db"
-		dbURI = fmt.Sprintf("file:%s?_foreign_keys=on", dbName)
+func WhatsAppInitDB() {
+	var err error
 
-	default:
-		return nil, errors.New("Unknown WhstaApp Client Database Type")
+	dbType, err := env.GetEnvString("WHATSAPP_DB_TYPE")
+	if err != nil {
+		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore Type")
 	}
 
-	// Create and Connect to Database
+	dbURI, err := env.GetEnvString("WHATSAPP_DB_URI")
+	if err != nil {
+		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore URI")
+	}
+
 	datastore, err := sqlstore.New(dbType, dbURI, nil)
 	if err != nil {
-		return nil, errors.New("Failed to Connect WhatsApp Client Database")
+		log.Print(nil).Fatal("Error Connect WhatsApp Client Datastore")
 	}
 
-	return datastore, nil
+	WhatsAppDatastore = datastore
 }
 
-func WhatsAppInitDB(jid string) (*whatsmeow.Client, error) {
-	// Connect to WhatsApp Client Datastore
-	datastore, err := WhatsAppDB("sqlite3")
-	if err != nil {
-		return nil, err
-	}
-
-	// Get WhatsApp Device Based on JID from Datastore
-	device, err := datastore.GetDevice(WhatsAppComposeJID(jid))
-	if err != nil {
-		return nil, errors.New("Failed to Load WhatsApp Client Device from Database")
-	}
-
-	// Set Client Properties
-	store.CompanionProps.Os = proto.String("Go WhatsApp Multi-Device REST")
-	store.CompanionProps.PlatformType = waproto.CompanionProps_DESKTOP.Enum()
-
-	// Create New Client Connection
-	client := whatsmeow.NewClient(device, nil)
-
-	// Return Client Connection
-	return client, nil
-}
-
-func WhatsAppInitClient(jid string) error {
+func WhatsAppInitClient(device *store.Device, jid string) error {
 	if WhatsAppClient[jid] == nil {
-		// Initialize New WhatsApp Client
-		client, err := WhatsAppInitDB(jid)
-		if err != nil {
-			return err
+		if device == nil {
+			// Initialize New WhatsApp Client Device in Datastore
+			device = WhatsAppDatastore.NewDevice()
 		}
 
-		// Set Created WhatsApp Client to Map
-		WhatsAppClient[jid] = client
+		// Set Client Properties
+		store.CompanionProps.Os = proto.String("Go WhatsApp Multi-Device REST")
+		store.CompanionProps.PlatformType = waproto.CompanionProps_DESKTOP.Enum()
+
+		// Initialize New WhatsApp Client
+		// And Save it to The Map
+		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 	}
 
 	return nil
@@ -176,7 +161,7 @@ func WhatsAppLogout(jid string) error {
 			// Force Disconnect
 			WhatsAppClient[jid].Disconnect()
 
-			// Manually Delete Device from Database Store
+			// Manually Delete Device from Datastore Store
 			err = WhatsAppClient[jid].Store.Delete()
 			if err != nil {
 				return err
@@ -209,6 +194,23 @@ func WhatsAppClientIsOK(jid string) error {
 }
 
 func WhatsAppComposeJID(jid string) types.JID {
+	// Decompose JID First Before Recomposing
+	jid = WhatsAppDecomposeJID(jid)
+
+	// Check if JID Contains '-' Symbol
+	if strings.ContainsRune(jid, '-') {
+		// Check if the JID is a Group ID
+		if len(strings.SplitN(jid, "-", 2)) == 2 {
+			// Return JID as Group Server (@g.us)
+			return types.NewJID(jid, types.GroupServer)
+		}
+	}
+
+	// Return JID as Default User Server (@s.whatsapp.net)
+	return types.NewJID(jid, types.DefaultUserServer)
+}
+
+func WhatsAppDecomposeJID(jid string) string {
 	// Check if JID Contains '@' Symbol
 	if strings.ContainsRune(jid, '@') {
 		// Split JID Based on '@' Symbol
@@ -223,17 +225,7 @@ func WhatsAppComposeJID(jid string) types.JID {
 		jid = jid[1:]
 	}
 
-	// Check if JID Contains '-' Symbol
-	if strings.ContainsRune(jid, '-') {
-		// Check if the JID is a Group ID
-		if len(strings.SplitN(jid, "-", 2)) == 2 {
-			// Return JID as Group Server (@g.us)
-			return types.NewJID(jid, types.GroupServer)
-		}
-	}
-
-	// Return JID as Default User Server (@s.whatsapp.net)
-	return types.NewJID(jid, types.DefaultUserServer)
+	return jid
 }
 
 func WhatsAppSendText(jid string, rjid string, message string) error {

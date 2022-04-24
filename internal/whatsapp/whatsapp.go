@@ -125,7 +125,7 @@ func Login(c echo.Context) error {
 	}
 
 	// Initialize WhatsApp Client
-	err = pkgWhatsApp.WhatsAppInitClient(jid)
+	err = pkgWhatsApp.WhatsAppInitClient(nil, jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
