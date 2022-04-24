@@ -23,7 +23,7 @@ func Startup() {
 
 		log.Print(nil).Info("Restoring WhatsApp Client for " + maskJID)
 
-		err := pkgWhatsApp.WhatAppConnect(jid)
+		err := pkgWhatsApp.WhatsAppInitClient(jid)
 		if err != nil {
 			log.Print(nil).Error(err.Error())
 		}

@@ -124,16 +124,20 @@ func Login(c echo.Context) error {
 		reqLogin.Output = "html"
 	}
 
-	err = pkgWhatsApp.WhatAppConnect(jid)
+	// Initialize WhatsApp Client
+	err = pkgWhatsApp.WhatsAppInitClient(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
 
+	// Get WhatsApp QR Code Image
 	qrCodeImage, qrCodeTimeout, err := pkgWhatsApp.WhatsAppLogin(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
 
+	// If Return is Not QR Code But Reconnected
+	// Then Return OK With Reconnected Status
 	if qrCodeImage == "WhatsApp Client is Reconnected" {
 		return router.ResponseSuccess(c, qrCodeImage)
 	}

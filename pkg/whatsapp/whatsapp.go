@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,21 +20,39 @@ import (
 
 var WhatsAppClient = make(map[string]*whatsmeow.Client)
 
-func WhatsAppInit(jid string) (*whatsmeow.Client, error) {
-	// Prepare SQLite Database File and Connection Address
-	dbFileName := "dbs/" + jid + ".db"
-	dbAddress := fmt.Sprintf("file:%s?_foreign_keys=on", dbFileName)
+func WhatsAppDB(dbType string) (*sqlstore.Container, error) {
+	var dbName, dbURI string
 
-	// Create and Connect to SQLite Database
-	datastore, err := sqlstore.New("sqlite3", dbAddress, nil)
-	if err != nil {
-		return nil, errors.New("Failed to Connect SQLite Database")
+	switch dbType {
+	case "sqlite3":
+		// Prepare SQLite Database and Connection URI
+		dbName = "dbs/WhatsApp.db"
+		dbURI = fmt.Sprintf("file:%s?_foreign_keys=on", dbName)
+
+	default:
+		return nil, errors.New("Unknown WhstaApp Client Database Type")
 	}
 
-	// Get First WhatsApp Device from SQLite Database
-	device, err := datastore.GetFirstDevice()
+	// Create and Connect to Database
+	datastore, err := sqlstore.New(dbType, dbURI, nil)
 	if err != nil {
-		return nil, errors.New("Failed to Load WhatsApp Device")
+		return nil, errors.New("Failed to Connect WhatsApp Client Database")
+	}
+
+	return datastore, nil
+}
+
+func WhatsAppInitDB(jid string) (*whatsmeow.Client, error) {
+	// Connect to WhatsApp Client Datastore
+	datastore, err := WhatsAppDB("sqlite3")
+	if err != nil {
+		return nil, err
+	}
+
+	// Get WhatsApp Device Based on JID from Datastore
+	device, err := datastore.GetDevice(WhatsAppComposeJID(jid))
+	if err != nil {
+		return nil, errors.New("Failed to Load WhatsApp Client Device from Database")
 	}
 
 	// Set Client Properties
@@ -49,10 +66,10 @@ func WhatsAppInit(jid string) (*whatsmeow.Client, error) {
 	return client, nil
 }
 
-func WhatAppConnect(jid string) error {
+func WhatsAppInitClient(jid string) error {
 	if WhatsAppClient[jid] == nil {
 		// Initialize New WhatsApp Client
-		client, err := WhatsAppInit(jid)
+		client, err := WhatsAppInitDB(jid)
 		if err != nil {
 			return err
 		}
@@ -156,11 +173,15 @@ func WhatsAppLogout(jid string) error {
 		// Logout WhatsApp Client and Disconnect from WebSocket
 		err := WhatsAppClient[jid].Logout()
 		if err != nil {
-			return err
-		}
+			// Force Disconnect
+			WhatsAppClient[jid].Disconnect()
 
-		// Remove SQLite Database File
-		_ = os.Remove("dbs/" + jid + ".db")
+			// Manually Delete Device from Database Store
+			err = WhatsAppClient[jid].Store.Delete()
+			if err != nil {
+				return err
+			}
+		}
 
 		// Free WhatsApp Client Map
 		WhatsAppClient[jid] = nil
