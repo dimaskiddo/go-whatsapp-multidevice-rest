@@ -10,7 +10,7 @@ func Startup() {
 
 	devices, err := pkgWhatsApp.WhatsAppDatastore.GetAllDevices()
 	if err != nil {
-		log.Print(nil).Error("Failed to Load WhatsApp Client Devices from Database")
+		log.Print(nil).Error("Failed to Load WhatsApp Client Devices from Datastore")
 	}
 
 	for _, device := range devices {
