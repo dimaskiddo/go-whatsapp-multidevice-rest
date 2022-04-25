@@ -44,6 +44,8 @@ func init() {
 }
 
 func WhatsAppInitClient(device *store.Device, jid string) {
+	var err error
+
 	if WhatsAppClient[jid] == nil {
 		if device == nil {
 			// Initialize New WhatsApp Client Device in Datastore
@@ -53,6 +55,20 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		// Set Client Properties
 		store.CompanionProps.Os = proto.String("Go WhatsApp Multi-Device REST")
 		store.CompanionProps.PlatformType = waproto.CompanionProps_DESKTOP.Enum()
+
+		// Set Client Versions
+		version.Major, err = env.GetEnvInt("WHATSAPP_VERSION_MAJOR")
+		if err == nil {
+			store.CompanionProps.Version.Primary = proto.Uint32(uint32(version.Major))
+		}
+		version.Minor, err = env.GetEnvInt("WHATSAPP_VERSION_MINOR")
+		if err == nil {
+			store.CompanionProps.Version.Secondary = proto.Uint32(uint32(version.Minor))
+		}
+		version.Patch, err = env.GetEnvInt("WHATSAPP_VERSION_PATCH")
+		if err == nil {
+			store.CompanionProps.Version.Tertiary = proto.Uint32(uint32(version.Patch))
+		}
 
 		// Initialize New WhatsApp Client
 		// And Save it to The Map
