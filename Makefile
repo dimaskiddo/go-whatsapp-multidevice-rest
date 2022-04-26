@@ -1,4 +1,4 @@
-BUILD_CGO_ENABLED  := 0
+BUILD_CGO_ENABLED  := 1
 SERVICE_NAME       := go-whatsapp-multidevice-rest
 SERVICE_PORT       := 3000
 IMAGE_NAME         := go-whatsapp-multidevice-rest
@@ -24,13 +24,13 @@ vendor:
 release:
 	make vendor
 	make clean-dist
-	goreleaser --snapshot --skip-publish --rm-dist
+	goreleaser release --snapshot --skip-publish --rm-dist
 	echo "Release '$(SERVICE_NAME)' complete, please check dist directory."
 
 publish:
 	make vendor
 	make clean-dist
-	GITHUB_TOKEN=$(GITHUB_TOKEN) goreleaser --rm-dist
+	GITHUB_TOKEN=$(GITHUB_TOKEN) goreleaser release --rm-dist
 	echo "Publish '$(SERVICE_NAME)' complete, please check your repository releases."
 
 build:
