@@ -79,7 +79,6 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, int) {
 	qrChanCode := make(chan string)
 	qrChanTimeout := make(chan int)
-	qrChanBase64 := make(chan string)
 
 	// Get QR Code Data and Timeout
 	go func() {
@@ -91,17 +90,12 @@ func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, int) {
 		}
 	}()
 
-	// Generate QR Code Data to PNG Base64 Format
-	go func() {
-		select {
-		case tmp := <-qrChanCode:
-			png, _ := qrCode.Encode(tmp, qrCode.Medium, 256)
-			qrChanBase64 <- base64.StdEncoding.EncodeToString(png)
-		}
-	}()
+	// Generate QR Code Data to PNG Image
+	qrTemp := <-qrChanCode
+	qrPNG, _ := qrCode.Encode(qrTemp, qrCode.Medium, 256)
 
-	// Return QR Code and Timeout Information
-	return <-qrChanBase64, <-qrChanTimeout
+	// Return QR Code PNG in Base64 Format and Timeout Information
+	return base64.StdEncoding.EncodeToString(qrPNG), <-qrChanTimeout
 }
 
 func WhatsAppLogin(jid string) (string, int, error) {
