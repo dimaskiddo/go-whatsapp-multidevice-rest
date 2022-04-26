@@ -23,7 +23,7 @@ WORKDIR /usr/app/${SERVICE_NAME}
 
 RUN mkdir -p dbs \
     && chmod 755 dbs
-COPY --from=go-builder /usr/src/app/.env.production ./.env
+COPY --from=go-builder /usr/src/app/.env.default ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 
 EXPOSE 3000

@@ -23,8 +23,8 @@ archives:
     amd64: 64-bit
   format: zip
   files:
-    - README.md
-    - dbs/*
+    - .env.default
+    - dbs/.gitkeep
 checksum:
   name_template: 'checksums.txt'
 snapshot:
