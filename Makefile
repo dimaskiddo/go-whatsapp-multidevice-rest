@@ -1,4 +1,4 @@
-BUILD_CGO_ENABLED  := 1
+BUILD_CGO_ENABLED  := 0
 SERVICE_NAME       := go-whatsapp-multidevice-rest
 SERVICE_PORT       := 3000
 IMAGE_NAME         := go-whatsapp-multidevice-rest
