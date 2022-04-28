@@ -2,7 +2,7 @@ package whatsapp
 
 import (
 	"bytes"
-	"image/jpeg"
+	"image/png"
 	"io"
 	"mime/multipart"
 	"strconv"
@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"golang.org/x/image/webp"
 
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 	pkgWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/whatsapp"
 
@@ -86,26 +87,31 @@ func sendMedia(c echo.Context, mediaType string) error {
 
 	// Issue #7 Old Version Client Cannot Render WebP Format
 	// If Media Type is "image" and MIME Type is "image/webp"
-	// Then Convert it as JPEG
+	// Then Convert it as PNG
 	var fileBytes []byte
 	if mediaType == "image" && fileType == "image/webp" {
-		// Decode WebP Image
-		fileWebP, err := webp.Decode(fileStream)
-		if err != nil {
-			return router.ResponseInternalError(c, err.Error())
-		}
+		isConvertMediaImageWebP := false
+		isConvertMediaImageWebP, _ = env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
 
-		// Encode to JPEG Image
-		fileJPEG := new(bytes.Buffer)
-		err = jpeg.Encode(fileJPEG, fileWebP, &jpeg.Options{Quality: 95})
-		if err != nil {
-			return router.ResponseInternalError(c, err.Error())
-		}
+		if isConvertMediaImageWebP {
+			// Decode WebP Image
+			fileWebP, err := webp.Decode(fileStream)
+			if err != nil {
+				return router.ResponseInternalError(c, "Error Decoding Image WebP Format")
+			}
 
-		// Set File Stream Bytes and File Type
-		// To New Encoded JPEG Image and File Type to "image/jpeg"
-		fileBytes = fileJPEG.Bytes()
-		fileType = "image/jpeg"
+			// Encode to PNG Image
+			filePNG := new(bytes.Buffer)
+			err = png.Encode(filePNG, fileWebP)
+			if err != nil {
+				return router.ResponseInternalError(c, "Error Encoding Image PNG Format")
+			}
+
+			// Set File Stream Bytes and File Type
+			// To New Encoded PNG Image and File Type to "image/png"
+			fileBytes = filePNG.Bytes()
+			fileType = "image/png"
+		}
 	} else {
 		// Convert File Stream in to Bytes
 		// Since WhatsApp Proto for Media is only Accepting Bytes format
