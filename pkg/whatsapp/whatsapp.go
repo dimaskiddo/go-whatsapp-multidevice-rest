@@ -114,6 +114,9 @@ func WhatsAppLogin(jid string) (string, int, error) {
 				return "", 0, err
 			}
 
+			// Set WhatsApp Client Presence to Available
+			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
+
 			// Get Generated QR Code and Timeout Information
 			qrImage, qrTimeout := WhatsAppGenerateQR(qrChanGenerate)
 
@@ -148,6 +151,9 @@ func WhatsAppReconnect(jid string) error {
 				return err
 			}
 
+			// Set WhatsApp Client Presence to Available
+			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
+
 			return nil
 		}
 
@@ -159,8 +165,13 @@ func WhatsAppReconnect(jid string) error {
 
 func WhatsAppLogout(jid string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Set WhatsApp Client Presence to Unavailable
+		_ = WhatsAppClient[jid].SendPresence(types.PresenceUnavailable)
+
 		// Logout WhatsApp Client and Disconnect from WebSocket
-		err := WhatsAppClient[jid].Logout()
+		err = WhatsAppClient[jid].Logout()
 		if err != nil {
 			// Force Disconnect
 			WhatsAppClient[jid].Disconnect()
@@ -232,13 +243,42 @@ func WhatsAppDecomposeJID(jid string) string {
 	return jid
 }
 
+func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio bool) {
+	// Set Compose Status
+	var typeCompose types.ChatPresence
+	if isComposing {
+		typeCompose = types.ChatPresenceComposing
+	} else {
+		typeCompose = types.ChatPresencePaused
+	}
+
+	// Set Compose Media Audio (Recording) or Text (Typing)
+	var typeComposeMedia types.ChatPresenceMedia
+	if isAudio {
+		typeComposeMedia = types.ChatPresenceMediaAudio
+	} else {
+		typeComposeMedia = types.ChatPresenceMediaText
+	}
+
+	// Send Chat Compose Status
+	_ = WhatsAppClient[jid].SendChatPresence(rjid, typeCompose, typeComposeMedia)
+}
+
 func WhatsAppSendText(jid string, rjid string, message string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
+
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, false)
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -246,10 +286,13 @@ func WhatsAppSendText(jid string, rjid string, message string) error {
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, false)
 
 		return nil
 	}
@@ -260,11 +303,19 @@ func WhatsAppSendText(jid string, rjid string, message string) error {
 
 func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude float64) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
+
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, false)
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -275,10 +326,13 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, false)
 
 		return nil
 	}
@@ -289,14 +343,25 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 
 func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType string, fileName string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
 
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, false)
+
 		// Upload File to WhatsApp Storage Server
 		fileUploaded, err := WhatsAppClient[jid].Upload(context.Background(), fileBytes, whatsmeow.MediaDocument)
+		if err != nil {
+			return errors.New("Error While Uploading Media to WhatsApp Server")
+		}
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -314,10 +379,13 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, false)
 
 		return nil
 	}
@@ -328,14 +396,25 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 
 func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
 
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, false)
+
 		// Upload Image to WhatsApp Storage Server
 		imageUploaded, err := WhatsAppClient[jid].Upload(context.Background(), imageBytes, whatsmeow.MediaImage)
+		if err != nil {
+			return errors.New("Error While Uploading Media to WhatsApp Server")
+		}
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -352,10 +431,13 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, false)
 
 		return nil
 	}
@@ -366,14 +448,25 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 
 func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
 
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, true)
+
 		// Upload Audio to WhatsApp Storage Server
 		audioUploaded, err := WhatsAppClient[jid].Upload(context.Background(), audioBytes, whatsmeow.MediaAudio)
+		if err != nil {
+			return errors.New("Error While Uploading Media to WhatsApp Server")
+		}
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -389,10 +482,13 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, true)
 
 		return nil
 	}
@@ -403,14 +499,25 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 
 func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string) error {
 	if WhatsAppClient[jid] != nil {
+		var err error
+
 		// Make Sure WhatsApp Client is OK
-		err := WhatsAppClientIsOK(jid)
+		err = WhatsAppClientIsOK(jid)
 		if err != nil {
 			return err
 		}
 
+		// Make Sure rJID is Proper JID Type
+		composeRJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence to Composing
+		WhatsAppComposeStatus(jid, composeRJID, true, false)
+
 		// Upload Video to WhatsApp Storage Server
 		videoUploaded, err := WhatsAppClient[jid].Upload(context.Background(), videoBytes, whatsmeow.MediaVideo)
+		if err != nil {
+			return errors.New("Error While Uploading Media to WhatsApp Server")
+		}
 
 		// Compose WhatsApp Proto
 		content := &waproto.Message{
@@ -427,10 +534,13 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(WhatsAppComposeJID(rjid), "", content)
+		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
 		if err != nil {
 			return err
 		}
+
+		// Set Chat Presence to Paused
+		WhatsAppComposeStatus(jid, composeRJID, false, false)
 
 		return nil
 	}
