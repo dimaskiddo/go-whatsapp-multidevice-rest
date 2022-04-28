@@ -89,29 +89,28 @@ func sendMedia(c echo.Context, mediaType string) error {
 	// If Media Type is "image" and MIME Type is "image/webp"
 	// Then Convert it as PNG
 	var fileBytes []byte
-	if mediaType == "image" && fileType == "image/webp" {
-		isConvertMediaImageWebP := false
-		isConvertMediaImageWebP, _ = env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
 
-		if isConvertMediaImageWebP {
-			// Decode WebP Image
-			fileWebP, err := webp.Decode(fileStream)
-			if err != nil {
-				return router.ResponseInternalError(c, "Error Decoding Image WebP Format")
-			}
+	isConvertMediaImageWebP := false
+	isConvertMediaImageWebP, _ = env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
 
-			// Encode to PNG Image
-			filePNG := new(bytes.Buffer)
-			err = png.Encode(filePNG, fileWebP)
-			if err != nil {
-				return router.ResponseInternalError(c, "Error Encoding Image PNG Format")
-			}
-
-			// Set File Stream Bytes and File Type
-			// To New Encoded PNG Image and File Type to "image/png"
-			fileBytes = filePNG.Bytes()
-			fileType = "image/png"
+	if mediaType == "image" && fileType == "image/webp" && isConvertMediaImageWebP {
+		// Decode WebP Image
+		fileWebP, err := webp.Decode(fileStream)
+		if err != nil {
+			return router.ResponseInternalError(c, "Error Decoding Image WebP Format")
 		}
+
+		// Encode to PNG Image
+		filePNG := new(bytes.Buffer)
+		err = png.Encode(filePNG, fileWebP)
+		if err != nil {
+			return router.ResponseInternalError(c, "Error Encoding Image PNG Format")
+		}
+
+		// Set File Stream Bytes and File Type
+		// To New Encoded PNG Image and File Type to "image/png"
+		fileBytes = filePNG.Bytes()
+		fileType = "image/png"
 	} else {
 		// Convert File Stream in to Bytes
 		// Since WhatsApp Proto for Media is only Accepting Bytes format
