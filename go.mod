@@ -3,6 +3,7 @@ module github.com/dimaskiddo/go-whatsapp-multidevice-rest
 go 1.17
 
 require (
+	github.com/SporkHubr/echo-http-cache v0.0.0-20200706100054-1d7ae9f38029
 	github.com/go-playground/validator/v10 v10.6.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.3.0
