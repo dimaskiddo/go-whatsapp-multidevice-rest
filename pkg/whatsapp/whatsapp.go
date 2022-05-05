@@ -264,61 +264,62 @@ func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio
 	_ = WhatsAppClient[jid].SendChatPresence(rjid, typeCompose, typeComposeMedia)
 }
 
-func WhatsAppSendText(jid string, rjid string, message string) error {
+func WhatsAppSendText(jid string, rjid string, message string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, false)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			Conversation: proto.String(message),
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, false)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude float64) error {
+func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude float64) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, false)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			LocationMessage: &waproto.LocationMessage{
 				DegreesLatitude:  proto.Float64(latitude),
 				DegreesLongitude: proto.Float64(longitude),
@@ -326,45 +327,44 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, false)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType string, fileName string) error {
+func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType string, fileName string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, false)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Upload File to WhatsApp Storage Server
 		fileUploaded, err := WhatsAppClient[jid].Upload(context.Background(), fileBytes, whatsmeow.MediaDocument)
 		if err != nil {
-			return errors.New("Error While Uploading Media to WhatsApp Server")
+			return "", errors.New("Error While Uploading Media to WhatsApp Server")
 		}
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			DocumentMessage: &waproto.DocumentMessage{
 				Url:           proto.String(fileUploaded.URL),
 				DirectPath:    proto.String(fileUploaded.DirectPath),
@@ -379,45 +379,44 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, false)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string) error {
+func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, false)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Upload Image to WhatsApp Storage Server
 		imageUploaded, err := WhatsAppClient[jid].Upload(context.Background(), imageBytes, whatsmeow.MediaImage)
 		if err != nil {
-			return errors.New("Error While Uploading Media to WhatsApp Server")
+			return "", errors.New("Error While Uploading Media to WhatsApp Server")
 		}
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			ImageMessage: &waproto.ImageMessage{
 				Url:           proto.String(imageUploaded.URL),
 				DirectPath:    proto.String(imageUploaded.DirectPath),
@@ -431,45 +430,44 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, false)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType string) error {
+func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, true)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, true)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, true)
 
 		// Upload Audio to WhatsApp Storage Server
 		audioUploaded, err := WhatsAppClient[jid].Upload(context.Background(), audioBytes, whatsmeow.MediaAudio)
 		if err != nil {
-			return errors.New("Error While Uploading Media to WhatsApp Server")
+			return "", errors.New("Error While Uploading Media to WhatsApp Server")
 		}
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			AudioMessage: &waproto.AudioMessage{
 				Url:           proto.String(audioUploaded.URL),
 				DirectPath:    proto.String(audioUploaded.DirectPath),
@@ -482,45 +480,44 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, true)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string) error {
+func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppClientIsOK(jid)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Make Sure rJID is Proper JID Type
-		composeRJID := WhatsAppComposeJID(rjid)
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
 
-		// Set Chat Presence to Composing
-		WhatsAppComposeStatus(jid, composeRJID, true, false)
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Upload Video to WhatsApp Storage Server
 		videoUploaded, err := WhatsAppClient[jid].Upload(context.Background(), videoBytes, whatsmeow.MediaVideo)
 		if err != nil {
-			return errors.New("Error While Uploading Media to WhatsApp Server")
+			return "", errors.New("Error While Uploading Media to WhatsApp Server")
 		}
 
 		// Compose WhatsApp Proto
-		content := &waproto.Message{
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
 			VideoMessage: &waproto.VideoMessage{
 				Url:           proto.String(videoUploaded.URL),
 				DirectPath:    proto.String(videoUploaded.DirectPath),
@@ -534,17 +531,14 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(composeRJID, "", content)
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
 		if err != nil {
-			return err
+			return "", err
 		}
 
-		// Set Chat Presence to Paused
-		WhatsAppComposeStatus(jid, composeRJID, false, false)
-
-		return nil
+		return msgId, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
-	return errors.New("WhatsApp Client is not Valid")
+	return "", errors.New("WhatsApp Client is not Valid")
 }

@@ -10,7 +10,7 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/sirupsen/logrus v1.8.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
-	go.mau.fi/whatsmeow v0.0.0-20220427133828-d1efb884b304
+	go.mau.fi/whatsmeow v0.0.0-20220504135614-f1f2a9d231fb
 	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
 	google.golang.org/protobuf v1.28.0
 	modernc.org/sqlite v1.17.0
