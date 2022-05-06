@@ -222,8 +222,10 @@ func sendMedia(c echo.Context, mediaType string) error {
 	// Then Convert it as PNG
 	var fileBytes []byte
 
-	isConvertMediaImageWebP := false
-	isConvertMediaImageWebP, _ = env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
+	isConvertMediaImageWebP, err := env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
+	if err != nil {
+		isConvertMediaImageWebP = false
+	}
 
 	if mediaType == "image" && fileType == "image/webp" && isConvertMediaImageWebP {
 		// Decode WebP Image
