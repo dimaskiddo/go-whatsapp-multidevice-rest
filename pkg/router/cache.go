@@ -3,22 +3,31 @@ package router
 import (
 	"time"
 
+	"github.com/labstack/echo/v4"
+
 	cache "github.com/SporkHubr/echo-http-cache"
 	"github.com/SporkHubr/echo-http-cache/adapter/memory"
 
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
 
-func HttpCacheInMemory(cap int, ttl int) *cache.Client {
-	// Check if Cache Capacity is Zero or Less Than Zero
+func HttpCacheInMemory(cap int, ttl int) echo.MiddlewareFunc {
+	// Check if Cache Capacity is Zero or Less
 	if cap <= 0 {
-		// Set Default Cache Capacity to 1000 Keys
+		// Set Default Cache Capacity
 		cap = 1000
 	}
 
-	// Create New InMemory Cache Adapter
+	// Check if Cache TTL is Zero or Less
+	if ttl <= 0 {
+		// Set Default Cache TTL
+		ttl = 5
+	}
+
+	// Create New In-Memory Cache Adapter
 	memcache, err := memory.NewAdapter(
-		// Set InMemory Cache Adapter Algorithm to LRU
+		// Set In-Memory Cache Adapter Algorithm to LRU
+		// and With Desired Capacity
 		memory.AdapterWithAlgorithm(memory.LRU),
 		memory.AdapterWithCapacity(cap),
 	)
@@ -28,8 +37,10 @@ func HttpCacheInMemory(cap int, ttl int) *cache.Client {
 		return nil
 	}
 
-	// Create New Cache Client with InMemory Adapter
-	client, err := cache.NewClient(
+	// Create New Cache
+	cache, err := cache.NewClient(
+		// Set Cache Adapter with In-Memory Cache Adapter
+		// and Set Cache TTL in Second(s)
 		cache.ClientWithAdapter(memcache),
 		cache.ClientWithTTL(time.Duration(ttl)*time.Second),
 	)
@@ -39,6 +50,6 @@ func HttpCacheInMemory(cap int, ttl int) *cache.Client {
 		return nil
 	}
 
-	// Return Cache Client
-	return client
+	// Return Cache as Echo Middleware
+	return cache.Middleware()
 }

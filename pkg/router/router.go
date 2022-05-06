@@ -33,11 +33,11 @@ func init() {
 
 	CacheCapacity, err = env.GetEnvInt("HTTP_CACHE_CAPACITY")
 	if err != nil {
-		CacheCapacity = 1000
+		CacheCapacity = 100
 	}
 
 	CacheTTLSeconds, err = env.GetEnvInt("HTTP_CACHE_TTL_SECONDS")
 	if err != nil {
-		CacheTTLSeconds = 10
+		CacheTTLSeconds = 5
 	}
 }
