@@ -4,8 +4,12 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
+	eSwagger "github.com/swaggo/echo-swagger"
+
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/auth"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
+
+	_ "github.com/dimaskiddo/go-whatsapp-multidevice-rest/docs"
 
 	ctlAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth"
 	typAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth/types"
@@ -18,6 +22,7 @@ func Routes(e *echo.Echo) {
 	// Route for Index
 	// ---------------------------------------------
 	e.GET(router.BaseURL, ctlIndex.Index)
+	e.GET(router.BaseURL+"/docs/*", eSwagger.WrapHandler)
 
 	// Route for Auth
 	// ---------------------------------------------

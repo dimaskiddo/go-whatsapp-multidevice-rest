@@ -1,10 +1,22 @@
 package main
 
+// @title Go WhatsApp Multi-Device REST API
+// @version 1.x
+// @description This is WhatsApp Multi-Device Implementation in Go REST API
+
+// @contact.name Dimas Restu Hidayanto
+// @contact.url https://github.com/dimaskiddo
+// @contact.email drh.dimasrestu@gmail.com
+
+// @schemes http
+// @host 127.0.0.1:3000
+
 import (
 	"context"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -45,6 +57,13 @@ func main() {
 	// Router Compression
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: router.GZipLevel,
+		Skipper: func(c echo.Context) bool {
+			if strings.Contains(c.Request().URL.Path, "docs") {
+				return true
+			}
+
+			return false
+		},
 	}))
 
 	// Router CORS
