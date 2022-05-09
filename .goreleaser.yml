@@ -1,7 +1,6 @@
 before:
   hooks:
     - make vendor
-    - make gen-docs
 builds:
 - main: ./cmd/main/main.go
   env:

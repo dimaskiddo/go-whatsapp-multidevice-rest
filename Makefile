@@ -23,27 +23,23 @@ vendor:
 
 release:
 	make vendor
-	make gen-docs
 	make clean-dist
 	goreleaser release --snapshot --skip-publish --rm-dist
 	echo "Release '$(SERVICE_NAME)' complete, please check dist directory."
 
 publish:
 	make vendor
-	make gen-docs
 	make clean-dist
 	GITHUB_TOKEN=$(GITHUB_TOKEN) goreleaser release --rm-dist
 	echo "Publish '$(SERVICE_NAME)' complete, please check your repository releases."
 
 build:
 	make vendor
-	make gen-docs
 	CGO_ENABLED=$(BUILD_CGO_ENABLED) go build -ldflags="-s -w" -a -o $(SERVICE_NAME) cmd/main/main.go
 	echo "Build '$(SERVICE_NAME)' complete."
 
 run:
 	make vendor
-	make gen-docs
 	go run cmd/main/*.go
 
 gen-docs:
@@ -63,7 +59,6 @@ clean:
 
 commit:
 	make vendor
-	make gen-docs
 	make clean
 	git add .
 	git commit -am $(COMMIT_MSG)
