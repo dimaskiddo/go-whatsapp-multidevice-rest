@@ -17,7 +17,6 @@ import (
 // @Summary     Generate Authentication Token
 // @Description Get Authentication Token
 // @Tags        Root
-// @Accept      */*
 // @Produce     json
 // @Success     200
 // @Security    BasicAuth

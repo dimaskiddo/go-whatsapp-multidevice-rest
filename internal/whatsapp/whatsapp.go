@@ -44,10 +44,10 @@ func convertFileToBytes(file multipart.File) ([]byte, error) {
 // @Summary     Generate QR Code for WhatsApp Multi-Device Login
 // @Description Get QR Code for WhatsApp Multi-Device Login
 // @Tags        WhatsApp
-// @Accept      */*
+// @Accept      multipart/form-data
 // @Produce     json
 // @Produce     html
-// @Param       output    query  string  false  "Change Output Format in HTML or JSON"  Enums(html, json)  default(html)
+// @Param       output    formData  string  false  "Change Output Format in HTML or JSON"  Enums(html, json)  default(html)
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/login [post]
@@ -108,7 +108,6 @@ func Login(c echo.Context) error {
 // @Summary     Logout Device from WhatsApp Multi-Device
 // @Description Make Device Logout from WhatsApp Multi-Device
 // @Tags        WhatsApp
-// @Accept      */*
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
@@ -126,13 +125,13 @@ func Logout(c echo.Context) error {
 }
 
 // SendText
-// @Summary     Logout Device from WhatsApp Multi-Device
-// @Description Make Device Logout from WhatsApp Multi-Device
+// @Summary     Send Text Message
+// @Description Send Text Message to Spesific Phone Number
 // @Tags        WhatsApp
-// @Accept      */*
+// @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    query  string  true  "Destination Phone Number"
-// @Param       message   query  string  true  "Text Message Content"
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       message   formData  string  true  "Text Message"
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/send/text [post]
@@ -157,6 +156,18 @@ func SendText(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Send Text Message", resSendMessage)
 }
 
+// SendLocation
+// @Summary     Send Location Message
+// @Description Send Location Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       latitude  formData  number  true  "Location Latitude"
+// @Param       longitude formData  number  true  "Location Longitude"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/location [post]
 func SendLocation(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -187,18 +198,64 @@ func SendLocation(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Send Location Message", resSendMessage)
 }
 
+// SendDocument
+// @Summary     Send Document Message
+// @Description Send Document Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       document  formData  file    true  "Document File"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/document [post]
 func SendDocument(c echo.Context) error {
 	return sendMedia(c, "document")
 }
 
+// SendImage
+// @Summary     Send Image Message
+// @Description Send Image Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       caption   formData  string  true  "Caption Image Message"
+// @Param       image     formData  file    true  "Image File"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/image [post]
 func SendImage(c echo.Context) error {
 	return sendMedia(c, "image")
 }
 
+// SendAudio
+// @Summary     Send Audio Message
+// @Description Send Audio Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       audio     formData  file    true  "Audio File"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/audio [post]
 func SendAudio(c echo.Context) error {
 	return sendMedia(c, "audio")
 }
 
+// SendVideo
+// @Summary     Send Video Message
+// @Description Send Video Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       caption   formData  string  true  "Caption Video Message"
+// @Param       video     formData  file    true  "Video File"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/video [post]
 func SendVideo(c echo.Context) error {
 	return sendMedia(c, "video")
 }

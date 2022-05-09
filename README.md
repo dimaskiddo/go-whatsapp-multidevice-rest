@@ -60,6 +60,8 @@ The build result will shown in build directory
 
 You can access any endpoint under **BASE_URL** environment variable which by default located at *.env* file.
 
+Integrated API Documentation can be accessed in **BASE_URL**/docs/index.html or by default it's in `127.0.0.1:3000/api/v1/whatsapp/docs/index.html`
+
 ## Built With
 
 * [Go](https://golang.org/) - Go Programming Languange

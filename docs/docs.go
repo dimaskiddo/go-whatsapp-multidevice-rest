@@ -23,9 +23,6 @@ const docTemplate = `{
         "/api/v1/whatsapp": {
             "get": {
                 "description": "Get The Server Status",
-                "consumes": [
-                    "*/*"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -48,9 +45,6 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Get Authentication Token",
-                "consumes": [
-                    "*/*"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -74,7 +68,7 @@ const docTemplate = `{
                 ],
                 "description": "Get QR Code for WhatsApp Multi-Device Login",
                 "consumes": [
-                    "*/*"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json",
@@ -94,7 +88,7 @@ const docTemplate = `{
                         "default": "html",
                         "description": "Change Output Format in HTML or JSON",
                         "name": "output",
-                        "in": "query"
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -112,9 +106,6 @@ const docTemplate = `{
                     }
                 ],
                 "description": "Make Device Logout from WhatsApp Multi-Device",
-                "consumes": [
-                    "*/*"
-                ],
                 "produces": [
                     "application/json"
                 ],
@@ -129,16 +120,16 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/text": {
+        "/api/v1/whatsapp/send/audio": {
             "post": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Make Device Logout from WhatsApp Multi-Device",
+                "description": "Send Audio Message to Spesific Phone Number",
                 "consumes": [
-                    "*/*"
+                    "multipart/form-data"
                 ],
                 "produces": [
                     "application/json"
@@ -146,20 +137,246 @@ const docTemplate = `{
                 "tags": [
                     "WhatsApp"
                 ],
-                "summary": "Logout Device from WhatsApp Multi-Device",
+                "summary": "Send Audio Message",
                 "parameters": [
                     {
                         "type": "string",
                         "description": "Destination Phone Number",
                         "name": "msisdn",
-                        "in": "query",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Audio File",
+                        "name": "audio",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/send/document": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Document Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp"
+                ],
+                "summary": "Send Document Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Document File",
+                        "name": "document",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/send/image": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Image Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp"
+                ],
+                "summary": "Send Image Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
                         "required": true
                     },
                     {
                         "type": "string",
-                        "description": "Text Message Content",
+                        "description": "Caption Image Message",
+                        "name": "caption",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Image File",
+                        "name": "image",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/send/location": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Location Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp"
+                ],
+                "summary": "Send Location Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Location Latitude",
+                        "name": "latitude",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "number",
+                        "description": "Location Longitude",
+                        "name": "longitude",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/send/text": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Text Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp"
+                ],
+                "summary": "Send Text Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Text Message",
                         "name": "message",
-                        "in": "query",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/send/video": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Video Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp"
+                ],
+                "summary": "Send Video Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Caption Video Message",
+                        "name": "caption",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Video File",
+                        "name": "video",
+                        "in": "formData",
                         "required": true
                     }
                 ],

@@ -10,8 +10,6 @@ info:
 paths:
   /api/v1/whatsapp:
     get:
-      consumes:
-      - '*/*'
       description: Get The Server Status
       produces:
       - application/json
@@ -23,8 +21,6 @@ paths:
       - Root
   /api/v1/whatsapp/auth:
     get:
-      consumes:
-      - '*/*'
       description: Get Authentication Token
       produces:
       - application/json
@@ -39,7 +35,7 @@ paths:
   /api/v1/whatsapp/login:
     post:
       consumes:
-      - '*/*'
+      - multipart/form-data
       description: Get QR Code for WhatsApp Multi-Device Login
       parameters:
       - default: html
@@ -47,7 +43,7 @@ paths:
         enum:
         - html
         - json
-        in: query
+        in: formData
         name: output
         type: string
       produces:
@@ -63,8 +59,6 @@ paths:
       - WhatsApp
   /api/v1/whatsapp/logout:
     post:
-      consumes:
-      - '*/*'
       description: Make Device Logout from WhatsApp Multi-Device
       produces:
       - application/json
@@ -76,19 +70,133 @@ paths:
       summary: Logout Device from WhatsApp Multi-Device
       tags:
       - WhatsApp
-  /api/v1/whatsapp/send/text:
+  /api/v1/whatsapp/send/audio:
     post:
       consumes:
-      - '*/*'
-      description: Make Device Logout from WhatsApp Multi-Device
+      - multipart/form-data
+      description: Send Audio Message to Spesific Phone Number
       parameters:
       - description: Destination Phone Number
-        in: query
+        in: formData
         name: msisdn
         required: true
         type: string
-      - description: Text Message Content
-        in: query
+      - description: Audio File
+        in: formData
+        name: audio
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Audio Message
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/document:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Document Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Document File
+        in: formData
+        name: document
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Document Message
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/image:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Image Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Caption Image Message
+        in: formData
+        name: caption
+        required: true
+        type: string
+      - description: Image File
+        in: formData
+        name: image
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Image Message
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/location:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Location Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Location Latitude
+        in: formData
+        name: latitude
+        required: true
+        type: number
+      - description: Location Longitude
+        in: formData
+        name: longitude
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Location Message
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/text:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Text Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Text Message
+        in: formData
         name: message
         required: true
         type: string
@@ -99,7 +207,38 @@ paths:
           description: ""
       security:
       - BearerAuth: []
-      summary: Logout Device from WhatsApp Multi-Device
+      summary: Send Text Message
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/video:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Video Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Caption Video Message
+        in: formData
+        name: caption
+        required: true
+        type: string
+      - description: Video File
+        in: formData
+        name: video
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Video Message
       tags:
       - WhatsApp
 schemes:
