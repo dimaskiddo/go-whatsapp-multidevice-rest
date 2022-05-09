@@ -14,6 +14,14 @@ import (
 )
 
 // Auth
+// @Summary     Generate Authentication Token
+// @Description Get Authentication Token
+// @Tags        Root
+// @Accept      */*
+// @Produce     json
+// @Success     200
+// @Security    BasicAuth
+// @Router      /api/v1/whatsapp/auth [get]
 func Auth(c echo.Context) error {
 	var reqAuthBasicInfo typAuth.RequestAuthBasicInfo
 	var resAuthJWTData typAuth.ResponseAuthJWTData

@@ -40,6 +40,17 @@ func convertFileToBytes(file multipart.File) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// Login
+// @Summary     Generate QR Code for WhatsApp Multi-Device Login
+// @Description Get QR Code for WhatsApp Multi-Device Login
+// @Tags        WhatsApp
+// @Accept      */*
+// @Produce     json
+// @Produce     html
+// @Param       output    query  string  false  "Change Output Format in HTML or JSON"  Enums(html, json)  default(html)
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/login [post]
 func Login(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -93,6 +104,15 @@ func Login(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Generated QR Code", resLogin)
 }
 
+// Logout
+// @Summary     Logout Device from WhatsApp Multi-Device
+// @Description Make Device Logout from WhatsApp Multi-Device
+// @Tags        WhatsApp
+// @Accept      */*
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/logout [post]
 func Logout(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -105,6 +125,17 @@ func Logout(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Logged Out")
 }
 
+// SendText
+// @Summary     Logout Device from WhatsApp Multi-Device
+// @Description Make Device Logout from WhatsApp Multi-Device
+// @Tags        WhatsApp
+// @Accept      */*
+// @Produce     json
+// @Param       msisdn    query  string  true  "Destination Phone Number"
+// @Param       message   query  string  true  "Text Message Content"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/text [post]
 func SendText(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID

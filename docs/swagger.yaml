@@ -1,0 +1,114 @@
+host: 127.0.0.1:3000
+info:
+  contact:
+    email: drh.dimasrestu@gmail.com
+    name: Dimas Restu Hidayanto
+    url: https://github.com/dimaskiddo
+  description: This is WhatsApp Multi-Device Implementation in Go REST API
+  title: Go WhatsApp Multi-Device REST API
+  version: 1.x
+paths:
+  /api/v1/whatsapp:
+    get:
+      consumes:
+      - '*/*'
+      description: Get The Server Status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: Show The Status of The Server
+      tags:
+      - Root
+  /api/v1/whatsapp/auth:
+    get:
+      consumes:
+      - '*/*'
+      description: Get Authentication Token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BasicAuth: []
+      summary: Generate Authentication Token
+      tags:
+      - Root
+  /api/v1/whatsapp/login:
+    post:
+      consumes:
+      - '*/*'
+      description: Get QR Code for WhatsApp Multi-Device Login
+      parameters:
+      - default: html
+        description: Change Output Format in HTML or JSON
+        enum:
+        - html
+        - json
+        in: query
+        name: output
+        type: string
+      produces:
+      - application/json
+      - text/html
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Generate QR Code for WhatsApp Multi-Device Login
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/logout:
+    post:
+      consumes:
+      - '*/*'
+      description: Make Device Logout from WhatsApp Multi-Device
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Logout Device from WhatsApp Multi-Device
+      tags:
+      - WhatsApp
+  /api/v1/whatsapp/send/text:
+    post:
+      consumes:
+      - '*/*'
+      description: Make Device Logout from WhatsApp Multi-Device
+      parameters:
+      - description: Destination Phone Number
+        in: query
+        name: msisdn
+        required: true
+        type: string
+      - description: Text Message Content
+        in: query
+        name: message
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Logout Device from WhatsApp Multi-Device
+      tags:
+      - WhatsApp
+schemes:
+- http
+securityDefinitions:
+  BasicAuth:
+    type: basic
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

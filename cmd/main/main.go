@@ -11,6 +11,12 @@ package main
 // @schemes http
 // @host 127.0.0.1:3000
 
+// @securityDefinitions.basic BasicAuth
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
 import (
 	"context"
 	"net/http"
