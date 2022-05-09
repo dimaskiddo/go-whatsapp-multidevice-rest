@@ -12,7 +12,7 @@ RUN go mod download \
 
 # Final Image
 # ---------------------------------------------------
-FROM dimaskiddo/debian-buster:base
+FROM dimaskiddo/alpine:base
 MAINTAINER Dimas Restu Hidayanto <dimas.restu@student.upi.edu>
 
 ARG SERVICE_NAME="go-whatsapp-multidevice-rest"
