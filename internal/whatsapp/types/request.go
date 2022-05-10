@@ -20,3 +20,9 @@ type RequestSendContact struct {
 	Name  string
 	Phone string
 }
+
+type RequestSendLink struct {
+	RJID    string
+	Caption string
+	URL     string
+}

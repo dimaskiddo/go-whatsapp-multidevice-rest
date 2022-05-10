@@ -598,3 +598,56 @@ func WhatsAppSendContact(jid string, rjid string, contactName string, contactNum
 	// Return Error WhatsApp Client is not Valid
 	return "", errors.New("WhatsApp Client is not Valid")
 }
+
+func WhatsAppSendLink(jid string, rjid string, linkCaption string, linkURL string) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppClientIsOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+
+		// Compose WhatsApp Proto
+		msgId := whatsmeow.GenerateMessageID()
+		msgCaption := "Open Link"
+		msgText := linkURL
+
+		if len(strings.TrimSpace(linkCaption)) > 0 {
+			msgCaption = linkCaption
+			msgText = fmt.Sprintf("%s\n%s", linkCaption, linkURL)
+		}
+
+		msgContent := &waproto.Message{
+			ExtendedTextMessage: &waproto.ExtendedTextMessage{
+				Text:         proto.String(msgText),
+				CanonicalUrl: proto.String(linkURL),
+				ContextInfo: &waproto.ContextInfo{
+					ActionLink: &waproto.ActionLink{
+						Url:         proto.String(linkURL),
+						ButtonTitle: proto.String(msgCaption),
+					},
+				},
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
+		if err != nil {
+			return "", err
+		}
+
+		return msgId, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}

@@ -43,7 +43,7 @@ func convertFileToBytes(file multipart.File) ([]byte, error) {
 // Login
 // @Summary     Generate QR Code for WhatsApp Multi-Device Login
 // @Description Get QR Code for WhatsApp Multi-Device Login
-// @Tags        WhatsApp
+// @Tags        WhatsApp Authentication
 // @Accept      multipart/form-data
 // @Produce     json
 // @Produce     html
@@ -107,7 +107,7 @@ func Login(c echo.Context) error {
 // Logout
 // @Summary     Logout Device from WhatsApp Multi-Device
 // @Description Make Device Logout from WhatsApp Multi-Device
-// @Tags        WhatsApp
+// @Tags        WhatsApp Authentication
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
@@ -127,7 +127,7 @@ func Logout(c echo.Context) error {
 // SendText
 // @Summary     Send Text Message
 // @Description Send Text Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -163,7 +163,7 @@ func SendText(c echo.Context) error {
 // SendLocation
 // @Summary     Send Location Message
 // @Description Send Location Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -205,7 +205,7 @@ func SendLocation(c echo.Context) error {
 // SendContact
 // @Summary     Send Contact Message
 // @Description Send Contact Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -244,10 +244,48 @@ func SendContact(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Send Contact Message", resSendMessage)
 }
 
+// SendLink
+// @Summary     Send Link Message
+// @Description Send Link Message to Spesific Phone Number
+// @Tags        WhatsApp Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       caption   formData  string  false "Link Caption"
+// @Param       url       formData  string  true  "Link URL"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/link [post]
+func SendLink(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqSendLink typWhatsApp.RequestSendLink
+	reqSendLink.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqSendLink.Caption = strings.TrimSpace(c.FormValue("caption"))
+	reqSendLink.URL = strings.TrimSpace(c.FormValue("url"))
+
+	if len(reqSendLink.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqSendLink.URL) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value URL")
+	}
+
+	var resSendMessage typWhatsApp.ResponseSendMessage
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendLink(jid, reqSendLink.RJID, reqSendLink.Caption, reqSendLink.URL)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully Send Link Message", resSendMessage)
+}
+
 // SendDocument
 // @Summary     Send Document Message
 // @Description Send Document Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -262,7 +300,7 @@ func SendDocument(c echo.Context) error {
 // SendImage
 // @Summary     Send Image Message
 // @Description Send Image Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -278,7 +316,7 @@ func SendImage(c echo.Context) error {
 // SendAudio
 // @Summary     Send Audio Message
 // @Description Send Audio Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
@@ -293,7 +331,7 @@ func SendAudio(c echo.Context) error {
 // SendVideo
 // @Summary     Send Video Message
 // @Description Send Video Message to Spesific Phone Number
-// @Tags        WhatsApp
+// @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination Phone Number"

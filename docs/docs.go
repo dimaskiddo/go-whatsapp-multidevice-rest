@@ -75,7 +75,7 @@ const docTemplate = `{
                     "text/html"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Authentication"
                 ],
                 "summary": "Generate QR Code for WhatsApp Multi-Device Login",
                 "parameters": [
@@ -110,7 +110,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Authentication"
                 ],
                 "summary": "Logout Device from WhatsApp Multi-Device",
                 "responses": {
@@ -135,7 +135,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Audio Message",
                 "parameters": [
@@ -176,7 +176,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Contact Message",
                 "parameters": [
@@ -224,7 +224,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Document Message",
                 "parameters": [
@@ -265,7 +265,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Image Message",
                 "parameters": [
@@ -298,6 +298,53 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/whatsapp/send/link": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Link Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Message"
+                ],
+                "summary": "Send Link Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Link Caption",
+                        "name": "caption",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Link URL",
+                        "name": "url",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/whatsapp/send/location": {
             "post": {
                 "security": [
@@ -313,7 +360,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Location Message",
                 "parameters": [
@@ -361,7 +408,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Text Message",
                 "parameters": [
@@ -402,7 +449,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp"
+                    "WhatsApp Message"
                 ],
                 "summary": "Send Video Message",
                 "parameters": [

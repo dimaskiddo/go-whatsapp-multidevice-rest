@@ -56,7 +56,7 @@ paths:
       - BearerAuth: []
       summary: Generate QR Code for WhatsApp Multi-Device Login
       tags:
-      - WhatsApp
+      - WhatsApp Authentication
   /api/v1/whatsapp/logout:
     post:
       description: Make Device Logout from WhatsApp Multi-Device
@@ -69,7 +69,7 @@ paths:
       - BearerAuth: []
       summary: Logout Device from WhatsApp Multi-Device
       tags:
-      - WhatsApp
+      - WhatsApp Authentication
   /api/v1/whatsapp/send/audio:
     post:
       consumes:
@@ -95,7 +95,7 @@ paths:
       - BearerAuth: []
       summary: Send Audio Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
   /api/v1/whatsapp/send/contact:
     post:
       consumes:
@@ -126,7 +126,7 @@ paths:
       - BearerAuth: []
       summary: Send Contact Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
   /api/v1/whatsapp/send/document:
     post:
       consumes:
@@ -152,7 +152,7 @@ paths:
       - BearerAuth: []
       summary: Send Document Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
   /api/v1/whatsapp/send/image:
     post:
       consumes:
@@ -183,7 +183,37 @@ paths:
       - BearerAuth: []
       summary: Send Image Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
+  /api/v1/whatsapp/send/link:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Link Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Link Caption
+        in: formData
+        name: caption
+        type: string
+      - description: Link URL
+        in: formData
+        name: url
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Link Message
+      tags:
+      - WhatsApp Message
   /api/v1/whatsapp/send/location:
     post:
       consumes:
@@ -214,7 +244,7 @@ paths:
       - BearerAuth: []
       summary: Send Location Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
   /api/v1/whatsapp/send/text:
     post:
       consumes:
@@ -240,7 +270,7 @@ paths:
       - BearerAuth: []
       summary: Send Text Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
   /api/v1/whatsapp/send/video:
     post:
       consumes:
@@ -271,7 +301,7 @@ paths:
       - BearerAuth: []
       summary: Send Video Message
       tags:
-      - WhatsApp
+      - WhatsApp Message
 schemes:
 - http
 securityDefinitions:
