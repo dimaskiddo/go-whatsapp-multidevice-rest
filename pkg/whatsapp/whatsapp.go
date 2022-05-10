@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"strings"
 
 	qrCode "github.com/skip2/go-qrcode"
@@ -541,6 +542,47 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 				FileSha256:    videoUploaded.FileSHA256,
 				FileEncSha256: videoUploaded.FileEncSHA256,
 				MediaKey:      videoUploaded.MediaKey,
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
+		if err != nil {
+			return "", err
+		}
+
+		return msgId, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppSendContact(jid string, rjid string, contactName string, contactNumber string) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppClientIsOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+
+		// Compose WhatsApp Proto
+		msgId := whatsmeow.GenerateMessageID()
+		msgVCard := fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN:;%v;;;\nFN:%v\nTEL;type=CELL;waid=%v:+%v\nEND:VCARD",
+			contactName, contactName, contactNumber, contactNumber)
+		msgContent := &waproto.Message{
+			ContactMessage: &waproto.ContactMessage{
+				DisplayName: proto.String(contactName),
+				Vcard:       proto.String(msgVCard),
 			},
 		}
 

@@ -96,6 +96,37 @@ paths:
       summary: Send Audio Message
       tags:
       - WhatsApp
+  /api/v1/whatsapp/send/contact:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Contact Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Contact Name
+        in: formData
+        name: name
+        required: true
+        type: string
+      - description: Contact Phone
+        in: formData
+        name: phone
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Contact Message
+      tags:
+      - WhatsApp
   /api/v1/whatsapp/send/document:
     post:
       consumes:

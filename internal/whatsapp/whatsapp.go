@@ -147,6 +147,10 @@ func SendText(c echo.Context) error {
 		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
 	}
 
+	if len(reqSendMessage.Message) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Message")
+	}
+
 	var resSendMessage typWhatsApp.ResponseSendMessage
 	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendText(jid, reqSendMessage.RJID, reqSendMessage.Message)
 	if err != nil {
@@ -196,6 +200,48 @@ func SendLocation(c echo.Context) error {
 	}
 
 	return router.ResponseSuccessWithData(c, "Successfully Send Location Message", resSendMessage)
+}
+
+// SendContact
+// @Summary     Send Contact Message
+// @Description Send Contact Message to Spesific Phone Number
+// @Tags        WhatsApp
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       name      formData  string  true  "Contact Name"
+// @Param       phone     formData  string  true  "Contact Phone"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/contact [post]
+func SendContact(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqSendContact typWhatsApp.RequestSendContact
+	reqSendContact.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqSendContact.Name = strings.TrimSpace(c.FormValue("name"))
+	reqSendContact.Phone = strings.TrimSpace(c.FormValue("phone"))
+
+	if len(reqSendContact.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqSendContact.Name) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Name")
+	}
+
+	if len(reqSendContact.Phone) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Phone")
+	}
+
+	var resSendMessage typWhatsApp.ResponseSendMessage
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendContact(jid, reqSendContact.RJID, reqSendContact.Name, reqSendContact.Phone)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully Send Contact Message", resSendMessage)
 }
 
 // SendDocument

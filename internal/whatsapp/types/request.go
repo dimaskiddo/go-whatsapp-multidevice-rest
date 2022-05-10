@@ -14,3 +14,9 @@ type RequestSendLocation struct {
 	Latitude  float64
 	Longitude float64
 }
+
+type RequestSendContact struct {
+	RJID  string
+	Name  string
+	Phone string
+}
