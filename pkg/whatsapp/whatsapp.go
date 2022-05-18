@@ -75,14 +75,11 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		// And Save it to The Map
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 
-		// Set WhatsApp Client One Message at a Time
-		isOneMessageFlight, err := env.GetEnvBool("WHATSAPP_ONE_MESSAGE_FLIGHT")
-		if err != nil {
-			// Set Default Value WhatsApp Client One Message at a Time
-			// For Account Safety then Turn it ON by Default
-			isOneMessageFlight = true
-		}
-		WhatsAppClient[jid].OneMessageAtATime = isOneMessageFlight
+		// Set WhatsApp Client Auto Reconnect
+		WhatsAppClient[jid].EnableAutoReconnect = true
+
+		// Set WhatsApp Client Auto Trust Identity
+		WhatsAppClient[jid].AutoTrustIdentity = true
 	}
 }
 

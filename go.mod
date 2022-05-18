@@ -12,7 +12,7 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/swaggo/echo-swagger v1.3.2
 	github.com/swaggo/swag v1.8.1
-	go.mau.fi/whatsmeow v0.0.0-20220504135614-f1f2a9d231fb
+	go.mau.fi/whatsmeow v0.0.0-20220517205516-246a2007ca7f
 	golang.org/x/image v0.0.0-20220413100746-70e8d0d3baa9
 	google.golang.org/protobuf v1.28.0
 	modernc.org/sqlite v1.17.0
