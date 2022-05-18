@@ -306,6 +306,7 @@ func SendDocument(c echo.Context) error {
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
 // @Param       caption   formData  string  true  "Caption Image Message"
 // @Param       image     formData  file    true  "Image File"
+// @Param       viewonce  formData  bool    false "Is View Once"              default(false)
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/send/image [post]
@@ -337,6 +338,7 @@ func SendAudio(c echo.Context) error {
 // @Param       msisdn    formData  string  true  "Destination Phone Number"
 // @Param       caption   formData  string  true  "Caption Video Message"
 // @Param       video     formData  file    true  "Video File"
+// @Param       viewonce  formData  bool    false "Is View Once"              default(false)
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/send/video [post]
@@ -370,6 +372,25 @@ func sendMedia(c echo.Context, mediaType string) error {
 	case "video":
 		fileStream, fileHeader, err = c.Request().FormFile("video")
 		reqSendMessage.Message = strings.TrimSpace(c.FormValue("caption"))
+	}
+
+	// Check if Media Type is "image" or "video"
+	// Then Parse ViewOnce Parameter
+	if mediaType == "image" || mediaType == "video" {
+		isViewOnce := strings.TrimSpace(c.FormValue("viewonce"))
+
+		if len(isViewOnce) == 0 {
+			// If ViewOnce Parameter Doesn't Exist or Empty String
+			// Then Set it Default to False
+			reqSendMessage.ViewOnce = false
+		} else {
+			// If ViewOnce Parameter is not Empty
+			// Then Parse it to Bool
+			reqSendMessage.ViewOnce, err = strconv.ParseBool(isViewOnce)
+			if err != nil {
+				return router.ResponseBadRequest(c, err.Error())
+			}
+		}
 	}
 
 	// Don't Forget to Close The File Stream
@@ -433,13 +454,13 @@ func sendMedia(c echo.Context, mediaType string) error {
 		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendDocument(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
 
 	case "image":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendImage(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendImage(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
 
 	case "audio":
 		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendAudio(jid, reqSendMessage.RJID, fileBytes, fileType)
 
 	case "video":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendVideo(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendVideo(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
 	}
 
 	// Return Internal Server Error

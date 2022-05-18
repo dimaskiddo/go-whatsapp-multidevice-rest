@@ -406,7 +406,7 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string) (string, error) {
+func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType string, imageCaption string, isViewOnce bool) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -441,6 +441,7 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 				FileSha256:    imageUploaded.FileSHA256,
 				FileEncSha256: imageUploaded.FileEncSHA256,
 				MediaKey:      imageUploaded.MediaKey,
+				ViewOnce:      proto.Bool(isViewOnce),
 			},
 		}
 
@@ -507,7 +508,7 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string) (string, error) {
+func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType string, videoCaption string, isViewOnce bool) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -542,6 +543,7 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 				FileSha256:    videoUploaded.FileSHA256,
 				FileEncSha256: videoUploaded.FileEncSHA256,
 				MediaKey:      videoUploaded.MediaKey,
+				ViewOnce:      proto.Bool(isViewOnce),
 			},
 		}
 

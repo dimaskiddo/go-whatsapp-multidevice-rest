@@ -289,6 +289,13 @@ const docTemplate = `{
                         "name": "image",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Is View Once",
+                        "name": "viewonce",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
@@ -473,6 +480,13 @@ const docTemplate = `{
                         "name": "video",
                         "in": "formData",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Is View Once",
+                        "name": "viewonce",
+                        "in": "formData"
                     }
                 ],
                 "responses": {
