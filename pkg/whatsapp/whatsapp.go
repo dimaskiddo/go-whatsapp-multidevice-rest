@@ -1,6 +1,7 @@
 package whatsapp
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
 	"errors"
@@ -8,6 +9,7 @@ import (
 	"strings"
 
 	qrCode "github.com/skip2/go-qrcode"
+	"github.com/sunshineplan/imgconv"
 	"google.golang.org/protobuf/proto"
 
 	"go.mau.fi/whatsmeow"
@@ -420,6 +422,73 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
+		// Issue #7 Old Version Client Cannot Render WebP Format
+		// If MIME Type is "image/webp" Then Convert it as PNG
+		isWhatsAppImageConvertWebP, err := env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_CONVERT_WEBP")
+		if err != nil {
+			isWhatsAppImageConvertWebP = false
+		}
+
+		if imageType == "image/webp" && isWhatsAppImageConvertWebP {
+			imgConvDecode, err := imgconv.Decode(bytes.NewReader(imageBytes))
+			if err != nil {
+				return "", errors.New("Error While Decoding Image Stream")
+			}
+
+			imgConvEncode := new(bytes.Buffer)
+
+			err = imgconv.Write(imgConvEncode, imgConvDecode, imgconv.FormatOption{Format: imgconv.PNG})
+			if err != nil {
+				return "", errors.New("Error While Encoding Image Stream")
+			}
+
+			imageBytes = imgConvEncode.Bytes()
+			imageType = "image/png"
+		}
+
+		// If WhatsApp Media Compression Enabled
+		// Then Resize The Image to Width 1024px and Preserve Aspect Ratio
+		isWhatsAppImageCompression, err := env.GetEnvBool("WHATSAPP_MEDIA_IMAGE_COMPRESSION")
+		if err != nil {
+			isWhatsAppImageCompression = false
+		}
+
+		if isWhatsAppImageCompression {
+			imgResizeDecode, err := imgconv.Decode(bytes.NewReader(imageBytes))
+			if err != nil {
+				return "", errors.New("Error While Decoding Resize Image Stream")
+			}
+
+			imgResizeEncode := new(bytes.Buffer)
+
+			err = imgconv.Write(imgResizeEncode,
+				imgconv.Resize(imgResizeDecode, imgconv.ResizeOption{Width: 1024}),
+				imgconv.FormatOption{})
+
+			if err != nil {
+				return "", errors.New("Error While Encoding Resize Image Stream")
+			}
+
+			imageBytes = imgResizeEncode.Bytes()
+		}
+
+		// Creating Image JPEG Thumbnail
+		// With Permanent Width 640px and Preserve Aspect Ratio
+		imgThumbDecode, err := imgconv.Decode(bytes.NewReader(imageBytes))
+		if err != nil {
+			return "", errors.New("Error While Decoding Thumbnail Image Stream")
+		}
+
+		imgThumbEncode := new(bytes.Buffer)
+
+		err = imgconv.Write(imgThumbEncode,
+			imgconv.Resize(imgThumbDecode, imgconv.ResizeOption{Width: 640}),
+			imgconv.FormatOption{Format: imgconv.JPEG})
+
+		if err != nil {
+			return "", errors.New("Error While Encoding Thumbnail Image Stream")
+		}
+
 		// Upload Image to WhatsApp Storage Server
 		imageUploaded, err := WhatsAppClient[jid].Upload(context.Background(), imageBytes, whatsmeow.MediaImage)
 		if err != nil {
@@ -438,6 +507,7 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 				FileSha256:    imageUploaded.FileSHA256,
 				FileEncSha256: imageUploaded.FileEncSHA256,
 				MediaKey:      imageUploaded.MediaKey,
+				JpegThumbnail: imgThumbEncode.Bytes(),
 				ViewOnce:      proto.Bool(isViewOnce),
 			},
 		}
