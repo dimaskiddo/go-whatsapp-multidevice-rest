@@ -432,14 +432,14 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		if imageType == "image/webp" && isWhatsAppImageConvertWebP {
 			imgConvDecode, err := imgconv.Decode(bytes.NewReader(imageBytes))
 			if err != nil {
-				return "", errors.New("Error While Decoding Image Stream")
+				return "", errors.New("Error While Decoding Convert Image Stream")
 			}
 
 			imgConvEncode := new(bytes.Buffer)
 
 			err = imgconv.Write(imgConvEncode, imgConvDecode, imgconv.FormatOption{Format: imgconv.PNG})
 			if err != nil {
-				return "", errors.New("Error While Encoding Image Stream")
+				return "", errors.New("Error While Encoding Convert Image Stream")
 			}
 
 			imageBytes = imgConvEncode.Bytes()
