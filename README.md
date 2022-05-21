@@ -113,7 +113,7 @@ make release
 
 ## API Access
 
-You can access any endpoint under **HTTP_BASE_URL** environment variable which by default located at *.env* file.
+You can access any endpoint under **HTTP_BASE_URL** environment variable which by default located at `.env` file.
 
 Integrated API Documentation can be accessed in `<HTTP_BASE_URL>/docs/` or by default it's in `localhost:3000/api/v1/whatsapp/docs/` or `127.0.0.1:3000/api/v1/whatsapp/docs/`
 
