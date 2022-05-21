@@ -2,6 +2,18 @@
 
 This repository contains example of implementation [go.mau.fi/whatsmeow](https://go.mau.fi/whatsmeow/) package with Multi-Session/Account Support. This example is using a [labstack/echo](https://github.com/labstack/echo) version 4.x.
 
+## Features
+
+- Multi-Session/Account Support
+- Multi-Device Support
+- WhatsApp Authentication (QR Code and Logout)
+- WhatsApp Messaging Send Text
+- WhatsApp Messaging Send Media (Document, Image, Audio, Video, Sticker)
+- WhatsApp Messaging Send Location
+- WhatsApp Messaging Send Contact
+- WhatsApp Messaging Send Link
+- And Much More ...
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
