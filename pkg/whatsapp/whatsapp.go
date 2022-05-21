@@ -8,8 +8,9 @@ import (
 	"fmt"
 	"strings"
 
-	qrCode "github.com/skip2/go-qrcode"
 	"github.com/sunshineplan/imgconv"
+
+	qrCode "github.com/skip2/go-qrcode"
 	"google.golang.org/protobuf/proto"
 
 	"go.mau.fi/whatsmeow"
