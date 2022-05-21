@@ -400,6 +400,47 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/whatsapp/send/sticker": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Sticker Message to Spesific Phone Number",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Message"
+                ],
+                "summary": "Send Sticker Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination Phone Number",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "Sticker File",
+                        "name": "sticker",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/whatsapp/send/text": {
             "post": {
                 "security": [

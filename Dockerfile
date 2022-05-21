@@ -12,7 +12,7 @@ RUN go mod download \
 
 # Final Image
 # ---------------------------------------------------
-FROM dimaskiddo/alpine:base
+FROM dimaskiddo/debian-buster:base
 MAINTAINER Dimas Restu Hidayanto <dimas.restu@student.upi.edu>
 
 ARG SERVICE_NAME="go-whatsapp-multidevice-rest"
@@ -21,8 +21,8 @@ ENV PATH $PATH:/usr/app/${SERVICE_NAME}
 
 WORKDIR /usr/app/${SERVICE_NAME}
 
-RUN mkdir -p dbs \
-    && chmod 755 dbs
+RUN mkdir -p {.bin/webp,dbs} \
+    && chmod 775 {.bin/webp,dbs}
 COPY --from=go-builder /usr/src/app/.env.default ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 

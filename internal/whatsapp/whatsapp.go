@@ -343,6 +343,21 @@ func SendVideo(c echo.Context) error {
 	return sendMedia(c, "video")
 }
 
+// SendSticker
+// @Summary     Send Sticker Message
+// @Description Send Sticker Message to Spesific Phone Number
+// @Tags        WhatsApp Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       sticker   formData  file    true  "Sticker File"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/send/sticker [post]
+func SendSticker(c echo.Context) error {
+	return sendMedia(c, "sticker")
+}
+
 func sendMedia(c echo.Context, mediaType string) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -369,6 +384,9 @@ func sendMedia(c echo.Context, mediaType string) error {
 	case "video":
 		fileStream, fileHeader, err = c.Request().FormFile("video")
 		reqSendMessage.Message = strings.TrimSpace(c.FormValue("caption"))
+
+	case "sticker":
+		fileStream, fileHeader, err = c.Request().FormFile("sticker")
 	}
 
 	// Don't Forget to Close The File Stream
@@ -428,6 +446,9 @@ func sendMedia(c echo.Context, mediaType string) error {
 
 	case "video":
 		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendVideo(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
+
+	case "sticker":
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendSticker(jid, reqSendMessage.RJID, fileBytes)
 	}
 
 	// Return Internal Server Error

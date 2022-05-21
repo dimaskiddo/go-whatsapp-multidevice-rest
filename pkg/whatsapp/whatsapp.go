@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strings"
 
+	webp "github.com/nickalie/go-webpbin"
 	"github.com/sunshineplan/imgconv"
 
 	qrCode "github.com/skip2/go-qrcode"
@@ -706,6 +707,71 @@ func WhatsAppSendLink(jid string, rjid string, linkCaption string, linkURL strin
 						ButtonTitle: proto.String(msgCaption),
 					},
 				},
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(remoteJID, msgId, msgContent)
+		if err != nil {
+			return "", err
+		}
+
+		return msgId, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppSendSticker(jid string, rjid string, stickerBytes []byte) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppClientIsOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Make Sure Remote JID is Proper JID Type
+		remoteJID := WhatsAppComposeJID(rjid)
+
+		// Set Chat Presence
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+
+		stickerConvDecode, err := imgconv.Decode(bytes.NewReader(stickerBytes))
+		if err != nil {
+			return "", errors.New("Error While Decoding Convert Sticker Stream")
+		}
+
+		stickerConvResize := imgconv.Resize(stickerConvDecode, imgconv.ResizeOption{Width: 512, Height: 512})
+		stickerConvEncode := new(bytes.Buffer)
+
+		err = webp.Encode(stickerConvEncode, stickerConvResize)
+		if err != nil {
+			return "", errors.New("Error While Encoding Convert Sticker Stream")
+		}
+
+		stickerBytes = stickerConvEncode.Bytes()
+
+		// Upload Image to WhatsApp Storage Server
+		stickerUploaded, err := WhatsAppClient[jid].Upload(context.Background(), stickerBytes, whatsmeow.MediaImage)
+		if err != nil {
+			return "", errors.New("Error While Uploading Media to WhatsApp Server")
+		}
+
+		// Compose WhatsApp Proto
+		msgId := whatsmeow.GenerateMessageID()
+		msgContent := &waproto.Message{
+			StickerMessage: &waproto.StickerMessage{
+				Url:           proto.String(stickerUploaded.URL),
+				DirectPath:    proto.String(stickerUploaded.DirectPath),
+				Mimetype:      proto.String("image/webp"),
+				FileLength:    proto.Uint64(stickerUploaded.FileLength),
+				FileSha256:    stickerUploaded.FileSHA256,
+				FileEncSha256: stickerUploaded.FileEncSHA256,
+				MediaKey:      stickerUploaded.MediaKey,
 			},
 		}
 

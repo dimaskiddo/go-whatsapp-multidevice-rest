@@ -250,6 +250,32 @@ paths:
       summary: Send Location Message
       tags:
       - WhatsApp Message
+  /api/v1/whatsapp/send/sticker:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Sticker Message to Spesific Phone Number
+      parameters:
+      - description: Destination Phone Number
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Sticker File
+        in: formData
+        name: sticker
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Sticker Message
+      tags:
+      - WhatsApp Message
   /api/v1/whatsapp/send/text:
     post:
       consumes:

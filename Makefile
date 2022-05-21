@@ -46,6 +46,9 @@ gen-docs:
 	rm -rf docs/*
 	swag init -g cmd/main/main.go --output docs
 
+clean-dbs:
+	rm -f dbs/WhatsApp.db
+
 clean-dist:
 	rm -rf dist
 
@@ -53,6 +56,7 @@ clean-build:
 	rm -f $(SERVICE_NAME)
 
 clean:
+	make clean-dbs
 	make clean-dist
 	make clean-build
 	rm -rf vendor
