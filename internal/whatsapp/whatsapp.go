@@ -101,6 +101,31 @@ func Login(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Generated QR Code", resLogin)
 }
 
+// Registered
+// @Summary     Check If Phone Number is Registered in WhatsApp
+// @Description Check Phone Number is Registered in WhatsApp
+// @Tags        WhatsApp Authentication
+// @Produce     json
+// @Param       msisdn    query  string  true  "Phone Number to Check"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/registered [get]
+func Registered(c echo.Context) error {
+	jid := jwtPayload(c).JID
+	remoteJID := strings.TrimSpace(c.QueryParam("msisdn"))
+
+	if len(remoteJID) == 0 {
+		return router.ResponseInternalError(c, "Missing Query Value MSISDN")
+	}
+
+	_, err := pkgWhatsApp.WhatsAppComposeJID(jid, remoteJID)
+	if err != nil {
+		return router.ResponseNotFound(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Phone Number is Registered")
+}
+
 // Logout
 // @Summary     Logout Device from WhatsApp Multi-Device
 // @Description Make Device Logout from WhatsApp Multi-Device
@@ -119,33 +144,6 @@ func Logout(c echo.Context) error {
 	}
 
 	return router.ResponseSuccess(c, "Successfully Logged Out")
-}
-
-// Registered
-// @Summary     Check If Phone Number is Registered in WhatsApp
-// @Description Check Phone Number is Registered in WhatsApp
-// @Tags        WhatsApp Authentication
-// @Produce     json
-// @Param       msisdn    query  string  true  "Phone Number to Check"
-// @Success     200
-// @Security    BearerAuth
-// @Router      /api/v1/whatsapp/registered [get]
-func Registered(c echo.Context) error {
-	jid := jwtPayload(c).JID
-	rjid := strings.TrimSpace(c.QueryParam("msisdn"))
-
-	if len(rjid) == 0 {
-		return router.ResponseInternalError(c, "Missing Param Value MSISDN")
-	}
-
-	rjid = pkgWhatsApp.WhatsAppDecomposeJID(rjid)
-
-	_, isJIDRegistered := pkgWhatsApp.WhatsAppCheckJID(jid, rjid)
-	if !isJIDRegistered {
-		return router.ResponseNotFound(c, "Phone Number is Not Registered")
-	}
-
-	return router.ResponseSuccess(c, "Phone Number is Registered")
 }
 
 // SendText
