@@ -220,8 +220,8 @@ github.com/yuin/goldmark v1.4.0/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1
 github.com/yuin/goldmark v1.4.1/go.mod h1:mwnBkeHKe2W/ZEtQ+71ViKU8L12m81fl3OWwC1Zlc8k=
 go.mau.fi/libsignal v0.0.0-20220425070825-c40c839ee6a0 h1:3IQF2bgAyibdo77hTejwuJe4jlypj9QaE4xCQuxrThM=
 go.mau.fi/libsignal v0.0.0-20220425070825-c40c839ee6a0/go.mod h1:kBOXTvYyDG/q1Ihgvd4J6WenGPh7wtEGvPKF6vmf5ak=
-go.mau.fi/whatsmeow v0.0.0-20220517205516-246a2007ca7f h1:0eo1TMJBx2pv7vNh/sPAl8bXPpn+HwrVJntuOnejMfs=
-go.mau.fi/whatsmeow v0.0.0-20220517205516-246a2007ca7f/go.mod h1:iUBgOLNaqShLrR17u0kIiRptIGFH+nbT1tRhaWBEX/c=
+go.mau.fi/whatsmeow v0.0.0-20220604174810-f28d984f1b9a h1:kLIh5zAEvEMK8k8Qg2aU6aMDfJmrf5+XJ3t3Q3ZCV7o=
+go.mau.fi/whatsmeow v0.0.0-20220604174810-f28d984f1b9a/go.mod h1:iUBgOLNaqShLrR17u0kIiRptIGFH+nbT1tRhaWBEX/c=
 go.opentelemetry.io/otel v0.5.0/go.mod h1:jzBIgIzK43Iu1BpDAXwqOd6UPsSAk+ewVZ5ofSXw4Ek=
 go.opentelemetry.io/otel v0.6.0/go.mod h1:jzBIgIzK43Iu1BpDAXwqOd6UPsSAk+ewVZ5ofSXw4Ek=
 go.opentelemetry.io/otel v0.7.0/go.mod h1:aZMyHG5TqDOXEgH2tyLiXSUKly1jT3yqE9PmrzIeCdo=

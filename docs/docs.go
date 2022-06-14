@@ -120,6 +120,37 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/whatsapp/registered": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Check Phone Number is Registered in WhatsApp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Authentication"
+                ],
+                "summary": "Check If Phone Number is Registered in WhatsApp",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Phone Number to Check",
+                        "name": "msisdn",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/whatsapp/send/audio": {
             "post": {
                 "security": [

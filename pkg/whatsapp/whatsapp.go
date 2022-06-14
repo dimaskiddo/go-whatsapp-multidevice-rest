@@ -224,39 +224,66 @@ func WhatsAppClientIsOK(jid string) error {
 	return nil
 }
 
-func WhatsAppComposeJID(jid string) types.JID {
-	// Decompose JID First Before Recomposing
-	jid = WhatsAppDecomposeJID(jid)
+func WhatsAppCheckJID(jid string, phone string) (types.JID, bool) {
+	if WhatsAppClient[jid] != nil {
+		var phones []string
 
-	// Check if JID Contains '-' Symbol
-	if strings.ContainsRune(jid, '-') {
-		// Check if the JID is a Group ID
-		if len(strings.SplitN(jid, "-", 2)) == 2 {
-			// Return JID as Group Server (@g.us)
-			return types.NewJID(jid, types.GroupServer)
+		phones = append(phones, "+"+phone)
+		jidInfos, err := WhatsAppClient[jid].IsOnWhatsApp(phones)
+		if err == nil {
+			// If Phone Number is Registered in WhatsApp
+			if jidInfos[0].IsIn {
+				// Return JID Information
+				return jidInfos[0].JID, true
+			}
 		}
 	}
 
-	// Return JID as Default User Server (@s.whatsapp.net)
-	return types.NewJID(jid, types.DefaultUserServer)
+	// Return Empty JID Information
+	return types.EmptyJID, false
 }
 
-func WhatsAppDecomposeJID(jid string) string {
-	// Check if JID Contains '@' Symbol
-	if strings.ContainsRune(jid, '@') {
-		// Split JID Based on '@' Symbol
+func WhatsAppComposeJID(jid string, phone string) types.JID {
+	// Decompose Phone Number First Before Recomposing
+	phone = WhatsAppDecomposeJID(phone)
+
+	// Check if Phone Number is Registered in WhatsApp
+	jidInfo, jidOK := WhatsAppCheckJID(jid, phone)
+
+	// If Phone Number Registered Then
+	// Check if JID Server is in Group Server
+	// Or it's Default User Server
+	if jidOK {
+		// Check if JID Info is in Group Server
+		if jidInfo.Server == types.GroupServer {
+			// Return JID as Group Server (@g.us)
+			return types.NewJID(phone, types.GroupServer)
+		}
+
+		// Return JID as Default User Server (@s.whatsapp.net)
+		return types.NewJID(phone, types.DefaultUserServer)
+	}
+
+	// Return Empty JID
+	return types.EmptyJID
+}
+
+func WhatsAppDecomposeJID(phone string) string {
+	// Check if Phone Number Contains '@' Symbol
+	if strings.ContainsRune(phone, '@') {
+		// Split Phone Number Based on '@' Symbol
 		// and Get Only The First Section Before The Symbol
-		buffers := strings.Split(jid, "@")
-		jid = buffers[0]
+		buffers := strings.Split(phone, "@")
+		phone = buffers[0]
 	}
 
-	// Check if JID First Character is '+' Symbol
-	if jid[0] == '+' {
-		// Remove '+' Symbol from JID
-		jid = jid[1:]
+	// Check if Phone Number First Character is '+' Symbol
+	if phone[0] == '+' {
+		// Remove '+' Symbol from Phone Number
+		phone = phone[1:]
 	}
 
-	return jid
+	return phone
 }
 
 func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio bool) {
@@ -291,7 +318,10 @@ func WhatsAppSendText(jid string, rjid string, message string) (string, error) {
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -327,7 +357,10 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -366,7 +399,10 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -418,7 +454,10 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -538,7 +577,10 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, true)
@@ -588,7 +630,10 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -640,7 +685,10 @@ func WhatsAppSendContact(jid string, rjid string, contactName string, contactNum
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -681,7 +729,10 @@ func WhatsAppSendLink(jid string, rjid string, linkCaption string, linkURL strin
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -734,7 +785,10 @@ func WhatsAppSendSticker(jid string, rjid string, stickerBytes []byte) (string, 
 		}
 
 		// Make Sure Remote JID is Proper JID Type
-		remoteJID := WhatsAppComposeJID(rjid)
+		remoteJID := WhatsAppComposeJID(jid, rjid)
+		if remoteJID.IsEmpty() {
+			return "", errors.New("Phone Number is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)

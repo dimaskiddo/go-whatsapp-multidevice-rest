@@ -70,6 +70,25 @@ paths:
       summary: Logout Device from WhatsApp Multi-Device
       tags:
       - WhatsApp Authentication
+  /api/v1/whatsapp/registered:
+    get:
+      description: Check Phone Number is Registered in WhatsApp
+      parameters:
+      - description: Phone Number to Check
+        in: query
+        name: msisdn
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Check If Phone Number is Registered in WhatsApp
+      tags:
+      - WhatsApp Authentication
   /api/v1/whatsapp/send/audio:
     post:
       consumes:
