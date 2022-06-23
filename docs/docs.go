@@ -59,6 +59,28 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/whatsapp/group": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Joined Groups Information from WhatsApp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Group"
+                ],
+                "summary": "Get Joined Groups Information",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/whatsapp/login": {
             "post": {
                 "security": [
@@ -127,18 +149,18 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Check Phone Number is Registered in WhatsApp",
+                "description": "Check WhatsApp Personal ID or Group ID is Registered",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "WhatsApp Authentication"
                 ],
-                "summary": "Check If Phone Number is Registered in WhatsApp",
+                "summary": "Check If WhatsApp Personal ID or Group ID is Registered",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Phone Number to Check",
+                        "description": "WhatsApp Personal ID or Group ID to Check",
                         "name": "msisdn",
                         "in": "query",
                         "required": true
@@ -158,7 +180,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Audio Message to Spesific Phone Number",
+                "description": "Send Audio Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -172,7 +194,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -199,7 +221,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Contact Message to Spesific Phone Number",
+                "description": "Send Contact Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -213,7 +235,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -247,7 +269,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Document Message to Spesific Phone Number",
+                "description": "Send Document Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -261,7 +283,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -288,7 +310,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Image Message to Spesific Phone Number",
+                "description": "Send Image Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -302,7 +324,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -343,7 +365,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Link Message to Spesific Phone Number",
+                "description": "Send Link Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -357,7 +379,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -390,7 +412,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Location Message to Spesific Phone Number",
+                "description": "Send Location Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -404,7 +426,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -438,7 +460,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Sticker Message to Spesific Phone Number",
+                "description": "Send Sticker Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -452,7 +474,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -479,7 +501,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Text Message to Spesific Phone Number",
+                "description": "Send Text Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -493,7 +515,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true
@@ -520,7 +542,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Send Video Message to Spesific Phone Number",
+                "description": "Send Video Message to Spesific WhatsApp Personal ID or Group ID",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -534,7 +556,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Destination Phone Number",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
                         "name": "msisdn",
                         "in": "formData",
                         "required": true

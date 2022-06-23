@@ -102,11 +102,11 @@ func Login(c echo.Context) error {
 }
 
 // Registered
-// @Summary     Check If Phone Number is Registered in WhatsApp
-// @Description Check Phone Number is Registered in WhatsApp
+// @Summary     Check If WhatsApp Personal ID or Group ID is Registered
+// @Description Check WhatsApp Personal ID or Group ID is Registered
 // @Tags        WhatsApp Authentication
 // @Produce     json
-// @Param       msisdn    query  string  true  "Phone Number to Check"
+// @Param       msisdn    query  string  true  "WhatsApp Personal ID or Group ID to Check"
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/registered [get]
@@ -123,7 +123,7 @@ func Registered(c echo.Context) error {
 		return router.ResponseNotFound(c, err.Error())
 	}
 
-	return router.ResponseSuccess(c, "Phone Number is Registered")
+	return router.ResponseSuccess(c, "WhatsApp Personal ID or Group ID is Registered")
 }
 
 // Logout
@@ -148,11 +148,11 @@ func Logout(c echo.Context) error {
 
 // SendText
 // @Summary     Send Text Message
-// @Description Send Text Message to Spesific Phone Number
+// @Description Send Text Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       message   formData  string  true  "Text Message"
 // @Success     200
 // @Security    BearerAuth
@@ -184,11 +184,11 @@ func SendText(c echo.Context) error {
 
 // SendLocation
 // @Summary     Send Location Message
-// @Description Send Location Message to Spesific Phone Number
+// @Description Send Location Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       latitude  formData  number  true  "Location Latitude"
 // @Param       longitude formData  number  true  "Location Longitude"
 // @Success     200
@@ -226,11 +226,11 @@ func SendLocation(c echo.Context) error {
 
 // SendContact
 // @Summary     Send Contact Message
-// @Description Send Contact Message to Spesific Phone Number
+// @Description Send Contact Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       name      formData  string  true  "Contact Name"
 // @Param       phone     formData  string  true  "Contact Phone"
 // @Success     200
@@ -268,11 +268,11 @@ func SendContact(c echo.Context) error {
 
 // SendLink
 // @Summary     Send Link Message
-// @Description Send Link Message to Spesific Phone Number
+// @Description Send Link Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       caption   formData  string  false "Link Caption"
 // @Param       url       formData  string  true  "Link URL"
 // @Success     200
@@ -306,11 +306,11 @@ func SendLink(c echo.Context) error {
 
 // SendDocument
 // @Summary     Send Document Message
-// @Description Send Document Message to Spesific Phone Number
+// @Description Send Document Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       document  formData  file    true  "Document File"
 // @Success     200
 // @Security    BearerAuth
@@ -321,11 +321,11 @@ func SendDocument(c echo.Context) error {
 
 // SendImage
 // @Summary     Send Image Message
-// @Description Send Image Message to Spesific Phone Number
+// @Description Send Image Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       caption   formData  string  true  "Caption Image Message"
 // @Param       image     formData  file    true  "Image File"
 // @Param       viewonce  formData  bool    false "Is View Once"              default(false)
@@ -338,11 +338,11 @@ func SendImage(c echo.Context) error {
 
 // SendAudio
 // @Summary     Send Audio Message
-// @Description Send Audio Message to Spesific Phone Number
+// @Description Send Audio Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       audio     formData  file    true  "Audio File"
 // @Success     200
 // @Security    BearerAuth
@@ -353,11 +353,11 @@ func SendAudio(c echo.Context) error {
 
 // SendVideo
 // @Summary     Send Video Message
-// @Description Send Video Message to Spesific Phone Number
+// @Description Send Video Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       caption   formData  string  true  "Caption Video Message"
 // @Param       video     formData  file    true  "Video File"
 // @Param       viewonce  formData  bool    false "Is View Once"              default(false)
@@ -370,11 +370,11 @@ func SendVideo(c echo.Context) error {
 
 // SendSticker
 // @Summary     Send Sticker Message
-// @Description Send Sticker Message to Spesific Phone Number
+// @Description Send Sticker Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
 // @Accept      multipart/form-data
 // @Produce     json
-// @Param       msisdn    formData  string  true  "Destination Phone Number"
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
 // @Param       sticker   formData  file    true  "Sticker File"
 // @Success     200
 // @Security    BearerAuth
@@ -483,4 +483,24 @@ func sendMedia(c echo.Context, mediaType string) error {
 	}
 
 	return router.ResponseSuccessWithData(c, "Successfully Send Media Message", resSendMessage)
+}
+
+// GetGroup
+// @Summary     Get Joined Groups Information
+// @Description Get Joined Groups Information from WhatsApp
+// @Tags        WhatsApp Group
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/group [get]
+func GetGroup(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	group, err := pkgWhatsApp.WhatsAppGetGroup(jid)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully List Joined Groups", group)
 }

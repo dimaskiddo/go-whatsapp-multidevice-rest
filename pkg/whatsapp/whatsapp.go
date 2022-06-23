@@ -156,7 +156,7 @@ func WhatsAppReconnect(jid string) error {
 
 		// Make Sure Store ID is not Empty
 		// To do Reconnection
-		if WhatsAppClient[jid].Store.ID != nil {
+		if WhatsAppClient[jid] != nil {
 			err := WhatsAppClient[jid].Connect()
 			if err != nil {
 				return err
@@ -177,7 +177,7 @@ func WhatsAppReconnect(jid string) error {
 func WhatsAppLogout(jid string) error {
 	if WhatsAppClient[jid] != nil {
 		// Make Sure Store ID is not Empty
-		if WhatsAppClient[jid].Store.ID != nil {
+		if WhatsAppClient[jid] != nil {
 			var err error
 
 			// Set WhatsApp Client Presence to Unavailable
@@ -210,7 +210,7 @@ func WhatsAppLogout(jid string) error {
 	return errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppClientIsOK(jid string) error {
+func WhatsAppIsClientOK(jid string) error {
 	// Make Sure WhatsApp Client is Connected
 	if !WhatsAppClient[jid].IsConnected() {
 		return errors.New("WhatsApp Client is not Connected")
@@ -224,68 +224,68 @@ func WhatsAppClientIsOK(jid string) error {
 	return nil
 }
 
-func WhatsAppJIDIsOK(jid types.JID) error {
+func WhatsAppIsJIDOK(jid types.JID) error {
 	// Make Sure JID is not Empty
 	if jid.IsEmpty() {
-		return errors.New("Phone Number is not Registered")
+		return errors.New("WhatsApp ID is not Registered")
 	}
 
 	return nil
 }
 
-func WhatsAppGetJID(jid string, phone string) types.JID {
+func WhatsAppGetJID(jid string, id string) types.JID {
 	if WhatsAppClient[jid] != nil {
-		var phones []string
+		var ids []string
 
-		phones = append(phones, "+"+phone)
-		jidInfos, err := WhatsAppClient[jid].IsOnWhatsApp(phones)
+		ids = append(ids, "+"+id)
+		infos, err := WhatsAppClient[jid].IsOnWhatsApp(ids)
 		if err == nil {
-			// If Phone Number is Registered as JID
-			if jidInfos[0].IsIn {
-				// Return JID Information
-				return jidInfos[0].JID
+			// If WhatsApp ID is Registered Then
+			// Return ID Information
+			if infos[0].IsIn {
+				return infos[0].JID
 			}
 		}
 	}
 
-	// Return Empty JID Information
+	// Return Empty ID Information
 	return types.EmptyJID
 }
 
-func WhatsAppComposeJID(jid string, phone string) (types.JID, error) {
-	// Decompose Phone Number First Before Recomposing
-	phone = WhatsAppDecomposeJID(phone)
+func WhatsAppComposeJID(jid string, id string) (types.JID, error) {
+	// Decompose WhatsApp ID First Before Recomposing
+	id = WhatsAppDecomposeJID(id)
 
-	// Get Registered JID Information from Phone Number
-	jidInfo := WhatsAppGetJID(jid, phone)
+	// Get Registered ID Information from WhatsApp
+	info := WhatsAppGetJID(jid, id)
 
-	// Check if JID Information is OK
-	err := WhatsAppJIDIsOK(jidInfo)
+	// Check if ID Information is OK
+	err := WhatsAppIsJIDOK(info)
 	if err != nil {
 		// Return Empty JID
 		return types.EmptyJID, err
 	}
 
-	// Return New Composed JID from Phone Number and JID Server Information
-	return types.NewJID(phone, jidInfo.Server), nil
+	// Return New Composed JID from WhatsApp ID and JID Server Information
+	return types.NewJID(id, info.Server), nil
 }
 
-func WhatsAppDecomposeJID(phone string) string {
-	// Check if Phone Number Contains '@' Symbol
-	if strings.ContainsRune(phone, '@') {
-		// Split Phone Number Based on '@' Symbol
+func WhatsAppDecomposeJID(id string) string {
+	// Check if WhatsApp ID Contains '@' Symbol
+	if strings.ContainsRune(id, '@') {
+		// Split WhatsApp ID Based on '@' Symbol
 		// and Get Only The First Section Before The Symbol
-		buffers := strings.Split(phone, "@")
-		phone = buffers[0]
+		buffers := strings.Split(id, "@")
+		id = buffers[0]
 	}
 
-	// Check if Phone Number First Character is '+' Symbol
-	if phone[0] == '+' {
-		// Remove '+' Symbol from Phone Number
-		phone = phone[1:]
+	// Check if WhatsApp ID First Character is '+' Symbol
+	if id[0] == '+' {
+		// Remove '+' Symbol from WhatsApp ID
+		id = id[1:]
 	}
 
-	return phone
+	return id
 }
 
 func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio bool) {
@@ -314,7 +314,7 @@ func WhatsAppSendText(jid string, rjid string, message string) (string, error) {
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -354,7 +354,7 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -397,7 +397,7 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -453,7 +453,7 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -577,7 +577,7 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -631,7 +631,7 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -687,7 +687,7 @@ func WhatsAppSendContact(jid string, rjid string, contactName string, contactNum
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -732,7 +732,7 @@ func WhatsAppSendLink(jid string, rjid string, linkCaption string, linkURL strin
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -789,7 +789,7 @@ func WhatsAppSendSticker(jid string, rjid string, stickerBytes []byte) (string, 
 		var err error
 
 		// Make Sure WhatsApp Client is OK
-		err = WhatsAppClientIsOK(jid)
+		err = WhatsAppIsClientOK(jid)
 		if err != nil {
 			return "", err
 		}
@@ -851,4 +851,34 @@ func WhatsAppSendSticker(jid string, rjid string, stickerBytes []byte) (string, 
 
 	// Return Error WhatsApp Client is not Valid
 	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppGetGroup(jid string) ([]types.GroupInfo, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return nil, err
+		}
+
+		// Get Joined Group List
+		groups, err := WhatsAppClient[jid].GetJoinedGroups()
+		if err != nil {
+			return nil, err
+		}
+
+		// Put Group Information in List
+		var gids []types.GroupInfo
+		for _, group := range groups {
+			gids = append(gids, *group)
+		}
+
+		// Return Group Information List
+		return gids, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return nil, errors.New("WhatsApp Client is not Valid")
 }
