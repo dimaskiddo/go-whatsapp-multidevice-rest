@@ -224,15 +224,6 @@ func WhatsAppIsClientOK(jid string) error {
 	return nil
 }
 
-func WhatsAppIsJIDOK(jid types.JID) error {
-	// Make Sure JID is not Empty
-	if jid.IsEmpty() {
-		return errors.New("WhatsApp ID is not Registered")
-	}
-
-	return nil
-}
-
 func WhatsAppGetJID(jid string, id string) types.JID {
 	if WhatsAppClient[jid] != nil {
 		var ids []string
@@ -252,22 +243,19 @@ func WhatsAppGetJID(jid string, id string) types.JID {
 	return types.EmptyJID
 }
 
-func WhatsAppComposeJID(jid string, id string) (types.JID, error) {
+func WhatsAppComposeJID(id string) types.JID {
 	// Decompose WhatsApp ID First Before Recomposing
 	id = WhatsAppDecomposeJID(id)
 
-	// Get Registered ID Information from WhatsApp
-	info := WhatsAppGetJID(jid, id)
-
-	// Check if ID Information is OK
-	err := WhatsAppIsJIDOK(info)
-	if err != nil {
-		// Return Empty JID
-		return types.EmptyJID, err
+	// Check if ID is Group or Not By Detecting '-' for Old Group ID
+	// Or By ID Length That Should be 18 Digits or More
+	if strings.ContainsRune(id, '-') || len(id) >= 18 {
+		// Return New Group User JID
+		return types.NewJID(id, types.GroupServer)
 	}
 
-	// Return New Composed JID from WhatsApp ID and JID Server Information
-	return types.NewJID(id, info.Server), nil
+	// Return New Standard User JID
+	return types.NewJID(id, types.DefaultUserServer)
 }
 
 func WhatsAppDecomposeJID(id string) string {
@@ -319,12 +307,8 @@ func WhatsAppSendText(jid string, rjid string, message string) (string, error) {
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -359,12 +343,8 @@ func WhatsAppSendLocation(jid string, rjid string, latitude float64, longitude f
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -402,12 +382,8 @@ func WhatsAppSendDocument(jid string, rjid string, fileBytes []byte, fileType st
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -458,12 +434,8 @@ func WhatsAppSendImage(jid string, rjid string, imageBytes []byte, imageType str
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -582,12 +554,8 @@ func WhatsAppSendAudio(jid string, rjid string, audioBytes []byte, audioType str
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, true)
@@ -636,12 +604,8 @@ func WhatsAppSendVideo(jid string, rjid string, videoBytes []byte, videoType str
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -692,12 +656,8 @@ func WhatsAppSendContact(jid string, rjid string, contactName string, contactNum
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -737,12 +697,8 @@ func WhatsAppSendLink(jid string, rjid string, linkCaption string, linkURL strin
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -794,12 +750,8 @@ func WhatsAppSendSticker(jid string, rjid string, stickerBytes []byte) (string, 
 			return "", err
 		}
 
-		// Check if Remote JID is Registered and
 		// Compose New Remote JID
-		remoteJID, err := WhatsAppComposeJID(jid, rjid)
-		if err != nil {
-			return "", err
-		}
+		remoteJID := WhatsAppComposeJID(rjid)
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)

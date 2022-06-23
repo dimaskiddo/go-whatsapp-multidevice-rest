@@ -102,11 +102,11 @@ func Login(c echo.Context) error {
 }
 
 // Registered
-// @Summary     Check If WhatsApp Personal ID or Group ID is Registered
-// @Description Check WhatsApp Personal ID or Group ID is Registered
+// @Summary     Check If WhatsApp Personal ID is Registered
+// @Description Check WhatsApp Personal ID is Registered
 // @Tags        WhatsApp Authentication
 // @Produce     json
-// @Param       msisdn    query  string  true  "WhatsApp Personal ID or Group ID to Check"
+// @Param       msisdn    query  string  true  "WhatsApp Personal ID to Check"
 // @Success     200
 // @Security    BearerAuth
 // @Router      /api/v1/whatsapp/registered [get]
@@ -118,12 +118,12 @@ func Registered(c echo.Context) error {
 		return router.ResponseInternalError(c, "Missing Query Value MSISDN")
 	}
 
-	_, err := pkgWhatsApp.WhatsAppComposeJID(jid, remoteJID)
-	if err != nil {
-		return router.ResponseNotFound(c, err.Error())
+	jidInfo := pkgWhatsApp.WhatsAppGetJID(jid, remoteJID)
+	if jidInfo.IsEmpty() {
+		return router.ResponseNotFound(c, "WhatsApp Personal ID is Not Registered")
 	}
 
-	return router.ResponseSuccess(c, "WhatsApp Personal ID or Group ID is Registered")
+	return router.ResponseSuccess(c, "WhatsApp Personal ID is Registered")
 }
 
 // Logout

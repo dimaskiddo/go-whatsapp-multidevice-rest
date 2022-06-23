@@ -144,18 +144,18 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Check WhatsApp Personal ID or Group ID is Registered",
+                "description": "Check WhatsApp Personal ID is Registered",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "WhatsApp Authentication"
                 ],
-                "summary": "Check If WhatsApp Personal ID or Group ID is Registered",
+                "summary": "Check If WhatsApp Personal ID is Registered",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "WhatsApp Personal ID or Group ID to Check",
+                        "description": "WhatsApp Personal ID to Check",
                         "name": "msisdn",
                         "in": "query",
                         "required": true
