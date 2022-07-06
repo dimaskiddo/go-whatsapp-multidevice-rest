@@ -26,6 +26,8 @@ import (
 	"syscall"
 	"time"
 
+	cron "github.com/robfig/cron/v3"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -53,6 +55,11 @@ func (ev *EchoValidator) Validate(i interface{}) error {
 
 func main() {
 	var err error
+
+	// Intialize Cron
+	c := cron.New(cron.WithChain(
+		cron.Recover(cron.DiscardLogger),
+	), cron.WithSeconds())
 
 	// Initialize Echo
 	e := echo.New()
@@ -115,6 +122,9 @@ func main() {
 	// Running Startup Tasks
 	internal.Startup()
 
+	// Running Routines Tasks
+	internal.Routines(c)
+
 	// Get Server Configuration
 	var serverConfig Server
 
@@ -138,17 +148,19 @@ func main() {
 
 	// Watch for Shutdown Signal
 	sigShutdown := make(chan os.Signal, 1)
-	signal.Notify(sigShutdown, os.Interrupt)
-	signal.Notify(sigShutdown, syscall.SIGTERM)
+	signal.Notify(sigShutdown, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-sigShutdown
 
 	// Wait 5 Seconds Before Graceful Shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelShutdown()
 
 	// Try To Shutdown Server
-	err = e.Shutdown(ctx)
+	err = e.Shutdown(ctxShutdown)
 	if err != nil {
 		log.Print(nil).Fatal(err.Error())
 	}
+
+	// Try To Shutdown Cron
+	c.Stop()
 }
