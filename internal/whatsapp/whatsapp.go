@@ -174,7 +174,7 @@ func SendText(c echo.Context) error {
 	}
 
 	var resSendMessage typWhatsApp.ResponseSendMessage
-	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendText(jid, reqSendMessage.RJID, reqSendMessage.Message)
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendText(c.Request().Context(), jid, reqSendMessage.RJID, reqSendMessage.Message)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -216,7 +216,7 @@ func SendLocation(c echo.Context) error {
 	}
 
 	var resSendMessage typWhatsApp.ResponseSendMessage
-	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendLocation(jid, reqSendLocation.RJID, reqSendLocation.Latitude, reqSendLocation.Longitude)
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendLocation(c.Request().Context(), jid, reqSendLocation.RJID, reqSendLocation.Latitude, reqSendLocation.Longitude)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -258,7 +258,7 @@ func SendContact(c echo.Context) error {
 	}
 
 	var resSendMessage typWhatsApp.ResponseSendMessage
-	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendContact(jid, reqSendContact.RJID, reqSendContact.Name, reqSendContact.Phone)
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendContact(c.Request().Context(), jid, reqSendContact.RJID, reqSendContact.Name, reqSendContact.Phone)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -296,7 +296,7 @@ func SendLink(c echo.Context) error {
 	}
 
 	var resSendMessage typWhatsApp.ResponseSendMessage
-	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendLink(jid, reqSendLink.RJID, reqSendLink.Caption, reqSendLink.URL)
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendLink(c.Request().Context(), jid, reqSendLink.RJID, reqSendLink.Caption, reqSendLink.URL)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -458,22 +458,23 @@ func sendMedia(c echo.Context, mediaType string) error {
 	}
 
 	// Send Media Message Based on Media Type
+	ctx := c.Request().Context()
 	var resSendMessage typWhatsApp.ResponseSendMessage
 	switch mediaType {
 	case "document":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendDocument(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendDocument(ctx, jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message)
 
 	case "image":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendImage(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendImage(ctx, jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
 
 	case "audio":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendAudio(jid, reqSendMessage.RJID, fileBytes, fileType)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendAudio(ctx, jid, reqSendMessage.RJID, fileBytes, fileType)
 
 	case "video":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendVideo(jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendVideo(ctx, jid, reqSendMessage.RJID, fileBytes, fileType, reqSendMessage.Message, reqSendMessage.ViewOnce)
 
 	case "sticker":
-		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendSticker(jid, reqSendMessage.RJID, fileBytes)
+		resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendSticker(ctx, jid, reqSendMessage.RJID, fileBytes)
 	}
 
 	// Return Internal Server Error
