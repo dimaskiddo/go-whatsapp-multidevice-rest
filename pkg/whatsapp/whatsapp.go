@@ -310,6 +310,9 @@ func WhatsAppSendText(ctx context.Context, jid string, rjid string, message stri
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -346,6 +349,9 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -385,6 +391,9 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -437,6 +446,9 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -525,19 +537,19 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		msgId := whatsmeow.GenerateMessageID()
 		msgContent := &waproto.Message{
 			ImageMessage: &waproto.ImageMessage{
-				Url:           proto.String(imageUploaded.URL),
-				DirectPath:    proto.String(imageUploaded.DirectPath),
-				Mimetype:      proto.String(imageType),
-				Caption:       proto.String(imageCaption),
-				FileLength:    proto.Uint64(imageUploaded.FileLength),
-				FileSha256:    imageUploaded.FileSHA256,
-				FileEncSha256: imageUploaded.FileEncSHA256,
-				MediaKey:      imageUploaded.MediaKey,
-				JpegThumbnail: imgThumbEncode.Bytes(),
+				Url:                 proto.String(imageUploaded.URL),
+				DirectPath:          proto.String(imageUploaded.DirectPath),
+				Mimetype:            proto.String(imageType),
+				Caption:             proto.String(imageCaption),
+				FileLength:          proto.Uint64(imageUploaded.FileLength),
+				FileSha256:          imageUploaded.FileSHA256,
+				FileEncSha256:       imageUploaded.FileEncSHA256,
+				MediaKey:            imageUploaded.MediaKey,
+				JpegThumbnail:       imgThumbEncode.Bytes(),
 				ThumbnailDirectPath: &imageThumbUploaded.DirectPath,
 				ThumbnailSha256:     imageThumbUploaded.FileSHA256,
 				ThumbnailEncSha256:  imageThumbUploaded.FileEncSHA256,
-				ViewOnce:      proto.Bool(isViewOnce),
+				ViewOnce:            proto.Bool(isViewOnce),
 			},
 		}
 
@@ -566,6 +578,9 @@ func WhatsAppSendAudio(ctx context.Context, jid string, rjid string, audioBytes 
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, true)
@@ -616,6 +631,9 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -668,6 +686,9 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -709,6 +730,9 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
@@ -727,6 +751,7 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		msgContent := &waproto.Message{
 			ExtendedTextMessage: &waproto.ExtendedTextMessage{
 				Text:         proto.String(msgText),
+				MatchedText:  proto.String(msgCaption),
 				CanonicalUrl: proto.String(linkURL),
 				ContextInfo: &waproto.ContextInfo{
 					ActionLink: &waproto.ActionLink{
@@ -762,6 +787,9 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 
 		// Compose New Remote JID
 		remoteJID := WhatsAppComposeJID(rjid)
+		if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+			return "", errors.New("WhatsApp Personal ID is Not Registered")
+		}
 
 		// Set Chat Presence
 		WhatsAppComposeStatus(jid, remoteJID, true, false)

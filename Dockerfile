@@ -23,7 +23,7 @@ WORKDIR /usr/app/${SERVICE_NAME}
 
 RUN mkdir -p {.bin/webp,dbs} \
     && chmod 775 {.bin/webp,dbs}
-COPY --from=go-builder /usr/src/app/.env.default ./.env
+COPY --from=go-builder /usr/src/app/.env.example ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 
 EXPOSE 3000

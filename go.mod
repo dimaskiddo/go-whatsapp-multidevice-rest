@@ -16,8 +16,8 @@ require (
 	github.com/sunshineplan/imgconv v1.0.5
 	github.com/swaggo/echo-swagger v1.3.2
 	github.com/swaggo/swag v1.8.1
-	go.mau.fi/whatsmeow v0.0.0-20220811191500-f650c10b0068
-	google.golang.org/protobuf v1.28.0
+	go.mau.fi/whatsmeow v0.0.0-20221122081206-059049466d44
+	google.golang.org/protobuf v1.28.1
 	modernc.org/sqlite v1.17.0
 )
 
@@ -60,8 +60,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	go.mau.fi/libsignal v0.0.0-20220628090436-4d18b66b087e // indirect
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
+	go.mau.fi/libsignal v0.0.0-20221015105917-d970e7c3c9cf // indirect
+	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
 	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
 	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
