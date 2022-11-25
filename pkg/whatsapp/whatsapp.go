@@ -502,7 +502,7 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		imgThumbEncode := new(bytes.Buffer)
 
 		err = imgconv.Write(imgThumbEncode,
-			imgconv.Resize(imgThumbDecode, imgconv.ResizeOption{Width: 640}),
+			imgconv.Resize(imgThumbDecode, imgconv.ResizeOption{Width: 72}),
 			imgconv.FormatOption{Format: imgconv.JPEG})
 
 		if err != nil {
@@ -513,6 +513,12 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		imageUploaded, err := WhatsAppClient[jid].Upload(ctx, imageBytes, whatsmeow.MediaImage)
 		if err != nil {
 			return "", errors.New("Error While Uploading Media to WhatsApp Server")
+		}
+
+		// Upload Image Thumbnail to WhatsApp Storage Server
+		imageThumbUploaded, err := WhatsAppClient[jid].Upload(ctx, imgThumbEncode.Bytes(), whatsmeow.MediaLinkThumbnail)
+		if err != nil {
+			return "", errors.New("Error while Uploading Image Thumbnail to WhatsApp Server")
 		}
 
 		// Compose WhatsApp Proto
@@ -528,6 +534,9 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 				FileEncSha256: imageUploaded.FileEncSHA256,
 				MediaKey:      imageUploaded.MediaKey,
 				JpegThumbnail: imgThumbEncode.Bytes(),
+				ThumbnailDirectPath: &imageThumbUploaded.DirectPath,
+				ThumbnailSha256:     imageThumbUploaded.FileSHA256,
+				ThumbnailEncSha256:  imageThumbUploaded.FileEncSHA256,
 				ViewOnce:      proto.Bool(isViewOnce),
 			},
 		}
