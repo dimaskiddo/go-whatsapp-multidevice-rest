@@ -19,6 +19,7 @@ init-dist:
 
 vendor:
 	make clean
+	GO111MODULE=on go mod tidy
 	GO111MODULE=on go mod vendor
 
 release:

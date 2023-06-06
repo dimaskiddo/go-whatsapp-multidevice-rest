@@ -1,6 +1,6 @@
 module github.com/dimaskiddo/go-whatsapp-multidevice-rest
 
-go 1.17
+go 1.19
 
 require (
 	github.com/SporkHubr/echo-http-cache v0.0.0-20200706100054-1d7ae9f38029
@@ -16,8 +16,8 @@ require (
 	github.com/sunshineplan/imgconv v1.0.5
 	github.com/swaggo/echo-swagger v1.3.2
 	github.com/swaggo/swag v1.8.1
-	go.mau.fi/whatsmeow v0.0.0-20221122081206-059049466d44
-	google.golang.org/protobuf v1.28.1
+	go.mau.fi/whatsmeow v0.0.0-20230603164718-6ce745d7990a
+	google.golang.org/protobuf v1.30.0
 	modernc.org/sqlite v1.17.0
 )
 
@@ -28,6 +28,7 @@ require (
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
 	github.com/disintegration/imaging v1.6.2 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
+	github.com/frankban/quicktest v1.14.5 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
@@ -35,6 +36,7 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hhrutter/lzw v0.0.0-20190829144645-6f07a24e8650 // indirect
@@ -60,16 +62,15 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
-	go.mau.fi/libsignal v0.0.0-20221015105917-d970e7c3c9cf // indirect
-	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
+	go.mau.fi/libsignal v0.1.0 // indirect
+	golang.org/x/crypto v0.8.0 // indirect
 	golang.org/x/image v0.0.0-20211028202545-6944b10bf410 // indirect
-	golang.org/x/mod v0.6.0-dev.0.20220106191415-9b9b3d81d5e3 // indirect
-	golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4 // indirect
-	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
-	golang.org/x/text v0.3.7 // indirect
+	golang.org/x/mod v0.8.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
-	golang.org/x/tools v0.1.10 // indirect
-	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
+	golang.org/x/tools v0.6.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
 	modernc.org/cc/v3 v3.35.26 // indirect

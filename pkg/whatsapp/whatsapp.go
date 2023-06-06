@@ -319,18 +319,20 @@ func WhatsAppSendText(ctx context.Context, jid string, rjid string, message stri
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			Conversation: proto.String(message),
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -358,7 +360,9 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			LocationMessage: &waproto.LocationMessage{
 				DegreesLatitude:  proto.Float64(latitude),
@@ -367,12 +371,12 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -406,7 +410,9 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 		}
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			DocumentMessage: &waproto.DocumentMessage{
 				Url:           proto.String(fileUploaded.URL),
@@ -422,12 +428,12 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -534,7 +540,9 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		}
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			ImageMessage: &waproto.ImageMessage{
 				Url:                 proto.String(imageUploaded.URL),
@@ -554,12 +562,12 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -593,7 +601,9 @@ func WhatsAppSendAudio(ctx context.Context, jid string, rjid string, audioBytes 
 		}
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			AudioMessage: &waproto.AudioMessage{
 				Url:           proto.String(audioUploaded.URL),
@@ -607,12 +617,12 @@ func WhatsAppSendAudio(ctx context.Context, jid string, rjid string, audioBytes 
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -646,7 +656,9 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 		}
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			VideoMessage: &waproto.VideoMessage{
 				Url:           proto.String(videoUploaded.URL),
@@ -662,12 +674,12 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -695,7 +707,9 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgVCard := fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN:;%v;;;\nFN:%v\nTEL;type=CELL;waid=%v:+%v\nEND:VCARD",
 			contactName, contactName, contactNumber, contactNumber)
 		msgContent := &waproto.Message{
@@ -706,12 +720,12 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -739,7 +753,9 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgCaption := "Open Link"
 		msgText := linkURL
 
@@ -763,12 +779,12 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
@@ -817,7 +833,9 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 		}
 
 		// Compose WhatsApp Proto
-		msgId := whatsmeow.GenerateMessageID()
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: whatsmeow.GenerateMessageID(),
+		}
 		msgContent := &waproto.Message{
 			StickerMessage: &waproto.StickerMessage{
 				Url:           proto.String(stickerUploaded.URL),
@@ -831,12 +849,12 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgId, msgContent)
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgContent, msgExtra)
 		if err != nil {
 			return "", err
 		}
 
-		return msgId, nil
+		return msgExtra.ID, nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
