@@ -98,6 +98,11 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		// And Save it to The Map
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 
+		// Set WhatsApp Client Proxy Address if Proxy URL is Provided
+		if len(WhatsAppClientProxyURL) > 0 {
+			WhatsAppClient[jid].SetProxyAddress(WhatsAppClientProxyURL)
+		}
+
 		// Set WhatsApp Client Auto Reconnect
 		WhatsAppClient[jid].EnableAutoReconnect = true
 
