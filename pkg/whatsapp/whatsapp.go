@@ -6,8 +6,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 
+	"github.com/PuerkitoBio/goquery"
 	webp "github.com/nickalie/go-webpbin"
 	"github.com/sunshineplan/imgconv"
 
@@ -537,7 +539,7 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 
 			imgConvEncode := new(bytes.Buffer)
 
-			err = imgconv.Write(imgConvEncode, imgConvDecode, imgconv.FormatOption{Format: imgconv.PNG})
+			err = imgconv.Write(imgConvEncode, imgConvDecode, &imgconv.FormatOption{Format: imgconv.PNG})
 			if err != nil {
 				return "", errors.New("Error While Encoding Convert Image Stream")
 			}
@@ -562,8 +564,8 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 			imgResizeEncode := new(bytes.Buffer)
 
 			err = imgconv.Write(imgResizeEncode,
-				imgconv.Resize(imgResizeDecode, imgconv.ResizeOption{Width: 1024}),
-				imgconv.FormatOption{})
+				imgconv.Resize(imgResizeDecode, &imgconv.ResizeOption{Width: 1024}),
+				&imgconv.FormatOption{})
 
 			if err != nil {
 				return "", errors.New("Error While Encoding Resize Image Stream")
@@ -582,8 +584,8 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		imgThumbEncode := new(bytes.Buffer)
 
 		err = imgconv.Write(imgThumbEncode,
-			imgconv.Resize(imgThumbDecode, imgconv.ResizeOption{Width: 72}),
-			imgconv.FormatOption{Format: imgconv.JPEG})
+			imgconv.Resize(imgThumbDecode, &imgconv.ResizeOption{Width: 72}),
+			&imgconv.FormatOption{Format: imgconv.JPEG})
 
 		if err != nil {
 			return "", errors.New("Error While Encoding Thumbnail Image Stream")
@@ -797,6 +799,7 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption string, linkURL string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
+		var urlTitle, urlDescription string
 
 		// Make Sure WhatsApp Client is OK
 		err = WhatsAppIsClientOK(jid)
@@ -814,29 +817,48 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
 		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
 
+		// Get URL Metadata
+		urlResponse, err := http.Get(linkURL)
+		if err != nil {
+			return "", err
+		}
+		defer urlResponse.Body.Close()
+
+		if urlResponse.StatusCode != 200 {
+			return "", errors.New("Error While Fetching URL Metadata!")
+		}
+
+		// Query URL Metadata
+		docData, err := goquery.NewDocumentFromReader(urlResponse.Body)
+		if err != nil {
+			return "", err
+		}
+
+		docData.Find("title").Each(func(index int, element *goquery.Selection) {
+			urlTitle = element.Text()
+		})
+
+		docData.Find("meta[name='description']").Each(func(index int, element *goquery.Selection) {
+			urlDescription, _ = element.Attr("content")
+		})
+
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
 			ID: whatsmeow.GenerateMessageID(),
 		}
-		msgCaption := "Open Link"
 		msgText := linkURL
 
 		if len(strings.TrimSpace(linkCaption)) > 0 {
-			msgCaption = linkCaption
 			msgText = fmt.Sprintf("%s\n%s", linkCaption, linkURL)
 		}
 
 		msgContent := &waproto.Message{
 			ExtendedTextMessage: &waproto.ExtendedTextMessage{
 				Text:         proto.String(msgText),
-				MatchedText:  proto.String(msgCaption),
+				Title:        proto.String(urlTitle),
+				MatchedText:  proto.String(linkURL),
 				CanonicalUrl: proto.String(linkURL),
-				ContextInfo: &waproto.ContextInfo{
-					ActionLink: &waproto.ActionLink{
-						Url:         proto.String(linkURL),
-						ButtonTitle: proto.String(msgCaption),
-					},
-				},
+				Description:  proto.String(urlDescription),
 			},
 		}
 
@@ -878,7 +900,7 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 			return "", errors.New("Error While Decoding Convert Sticker Stream")
 		}
 
-		stickerConvResize := imgconv.Resize(stickerConvDecode, imgconv.ResizeOption{Width: 512, Height: 512})
+		stickerConvResize := imgconv.Resize(stickerConvDecode, &imgconv.ResizeOption{Width: 512, Height: 512})
 		stickerConvEncode := new(bytes.Buffer)
 
 		err = webp.Encode(stickerConvEncode, stickerConvResize)
