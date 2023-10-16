@@ -239,7 +239,7 @@ func WhatsAppLogin(jid string) (string, int, error) {
 	return "", 0, errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppPairPhone(jid string) (string, int, error) {
+func WhatsAppLoginPair(jid string) (string, int, error) {
 	if WhatsAppClient[jid] != nil {
 		// Make Sure WebSocket Connection is Disconnected
 		WhatsAppClient[jid].Disconnect()

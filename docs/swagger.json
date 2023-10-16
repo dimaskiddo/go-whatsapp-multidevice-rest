@@ -27,7 +27,7 @@
                 "summary": "Show The Status of The Server",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -49,7 +49,7 @@
                 "summary": "Generate Authentication Token",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -66,12 +66,12 @@
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Group"
+                    "WhatsApp Information"
                 ],
                 "summary": "Get Joined Groups Information",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -110,7 +110,32 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/api/v1/whatsapp/login/pair": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Get Pairing Code for WhatsApp Multi-Device Login",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Authentication"
+                ],
+                "summary": "Pair Phone for WhatsApp Multi-Device Login",
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -132,7 +157,7 @@
                 "summary": "Logout Device from WhatsApp Multi-Device",
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -149,7 +174,7 @@
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Authentication"
+                    "WhatsApp Information"
                 ],
                 "summary": "Check If WhatsApp Personal ID is Registered",
                 "parameters": [
@@ -163,7 +188,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -204,7 +229,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -252,7 +277,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -293,7 +318,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -348,7 +373,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -395,7 +420,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -443,7 +468,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -484,7 +509,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -525,7 +550,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }
@@ -580,7 +605,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": ""
+                        "description": "OK"
                     }
                 }
             }

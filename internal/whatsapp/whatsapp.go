@@ -102,15 +102,15 @@ func Login(c echo.Context) error {
 }
 
 // PairPhone
-// @Summary     Pair phone for WhatsApp Multi-Device Login
-// @Description Get pairing Code for WhatsApp Multi-Device Login
+// @Summary     Pair Phone for WhatsApp Multi-Device Login
+// @Description Get Pairing Code for WhatsApp Multi-Device Login
 // @Tags        WhatsApp Authentication
 // @Accept      multipart/form-data
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/pair [post]
-func PairPhone(c echo.Context) error {
+// @Router      /api/v1/whatsapp/login/pair [post]
+func LoginPair(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
@@ -118,7 +118,7 @@ func PairPhone(c echo.Context) error {
 	pkgWhatsApp.WhatsAppInitClient(nil, jid)
 
 	// Get WhatsApp pairing Code text
-	pairCode, pairCodeTimeout, err := pkgWhatsApp.WhatsAppPairPhone(jid)
+	pairCode, pairCodeTimeout, err := pkgWhatsApp.WhatsAppLoginPair(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -136,10 +136,30 @@ func PairPhone(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Generated Pairing Code", resPairing)
 }
 
+// Logout
+// @Summary     Logout Device from WhatsApp Multi-Device
+// @Description Make Device Logout from WhatsApp Multi-Device
+// @Tags        WhatsApp Authentication
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/logout [post]
+func Logout(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	err = pkgWhatsApp.WhatsAppLogout(jid)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Logged Out")
+}
+
 // Registered
 // @Summary     Check If WhatsApp Personal ID is Registered
 // @Description Check WhatsApp Personal ID is Registered
-// @Tags        WhatsApp Authentication
+// @Tags        WhatsApp Information
 // @Produce     json
 // @Param       msisdn    query  string  true  "WhatsApp Personal ID to Check"
 // @Success     200
@@ -161,24 +181,24 @@ func Registered(c echo.Context) error {
 	return router.ResponseSuccess(c, "WhatsApp Personal ID is Registered")
 }
 
-// Logout
-// @Summary     Logout Device from WhatsApp Multi-Device
-// @Description Make Device Logout from WhatsApp Multi-Device
-// @Tags        WhatsApp Authentication
+// GetGroup
+// @Summary     Get Joined Groups Information
+// @Description Get Joined Groups Information from WhatsApp
+// @Tags        WhatsApp Information
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/logout [post]
-func Logout(c echo.Context) error {
+// @Router      /api/v1/whatsapp/group [get]
+func GetGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
-	err = pkgWhatsApp.WhatsAppLogout(jid)
+	group, err := pkgWhatsApp.WhatsAppGetGroup(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
 
-	return router.ResponseSuccess(c, "Successfully Logged Out")
+	return router.ResponseSuccessWithData(c, "Successfully List Joined Groups", group)
 }
 
 // SendText
@@ -519,24 +539,4 @@ func sendMedia(c echo.Context, mediaType string) error {
 	}
 
 	return router.ResponseSuccessWithData(c, "Successfully Send Media Message", resSendMessage)
-}
-
-// GetGroup
-// @Summary     Get Joined Groups Information
-// @Description Get Joined Groups Information from WhatsApp
-// @Tags        WhatsApp Group
-// @Produce     json
-// @Success     200
-// @Security    BearerAuth
-// @Router      /api/v1/whatsapp/group [get]
-func GetGroup(c echo.Context) error {
-	var err error
-	jid := jwtPayload(c).JID
-
-	group, err := pkgWhatsApp.WhatsAppGetGroup(jid)
-	if err != nil {
-		return router.ResponseInternalError(c, err.Error())
-	}
-
-	return router.ResponseSuccessWithData(c, "Successfully List Joined Groups", group)
 }

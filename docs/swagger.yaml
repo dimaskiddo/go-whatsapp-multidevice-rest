@@ -15,7 +15,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       summary: Show The Status of The Server
       tags:
       - Root
@@ -26,7 +26,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BasicAuth: []
       summary: Generate Authentication Token
@@ -39,12 +39,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Get Joined Groups Information
       tags:
-      - WhatsApp Group
+      - WhatsApp Information
   /api/v1/whatsapp/login:
     post:
       consumes:
@@ -64,10 +64,25 @@ paths:
       - text/html
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Generate QR Code for WhatsApp Multi-Device Login
+      tags:
+      - WhatsApp Authentication
+  /api/v1/whatsapp/login/pair:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Get Pairing Code for WhatsApp Multi-Device Login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Pair Phone for WhatsApp Multi-Device Login
       tags:
       - WhatsApp Authentication
   /api/v1/whatsapp/logout:
@@ -77,7 +92,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Logout Device from WhatsApp Multi-Device
@@ -96,12 +111,12 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Check If WhatsApp Personal ID is Registered
       tags:
-      - WhatsApp Authentication
+      - WhatsApp Information
   /api/v1/whatsapp/send/audio:
     post:
       consumes:
@@ -122,7 +137,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Audio Message
@@ -154,7 +169,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Contact Message
@@ -181,7 +196,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Document Message
@@ -217,7 +232,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Image Message
@@ -247,7 +262,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Link Message
@@ -279,7 +294,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Location Message
@@ -306,7 +321,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Sticker Message
@@ -332,7 +347,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Text Message
@@ -368,7 +383,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Video Message
