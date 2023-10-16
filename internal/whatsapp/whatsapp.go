@@ -101,6 +101,41 @@ func Login(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Generated QR Code", resLogin)
 }
 
+// PairPhone
+// @Summary     Pair phone for WhatsApp Multi-Device Login
+// @Description Get pairing Code for WhatsApp Multi-Device Login
+// @Tags        WhatsApp Authentication
+// @Accept      multipart/form-data
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /api/v1/whatsapp/pair [post]
+func PairPhone(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	// Initialize WhatsApp Client
+	pkgWhatsApp.WhatsAppInitClient(nil, jid)
+
+	// Get WhatsApp pairing Code text
+	pairCode, pairCodeTimeout, err := pkgWhatsApp.WhatsAppPairPhone(jid)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	// If Return is not pairing code but Reconnected
+	// Then Return OK With Reconnected Status
+	if pairCode == "WhatsApp Client is Reconnected" {
+		return router.ResponseSuccess(c, pairCode)
+	}
+
+	var resPairing typWhatsApp.ResponsePairing
+	resPairing.PairCode = pairCode
+	resPairing.Timeout = pairCodeTimeout
+
+	return router.ResponseSuccessWithData(c, "Successfully Generated Pairing Code", resPairing)
+}
+
 // Registered
 // @Summary     Check If WhatsApp Personal ID is Registered
 // @Description Check WhatsApp Personal ID is Registered

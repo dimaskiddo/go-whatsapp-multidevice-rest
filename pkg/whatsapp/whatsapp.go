@@ -214,6 +214,41 @@ func WhatsAppLogin(jid string) (string, int, error) {
 	return "", 0, errors.New("WhatsApp Client is not Valid")
 }
 
+func WhatsAppPairPhone(jid string) (string, int, error) {
+	if WhatsAppClient[jid] != nil {
+		WhatsAppClient[jid].Disconnect()
+
+		if WhatsAppClient[jid].Store.ID == nil {
+			// Connect WebSocket while also Initialize QR Code Data
+			err := WhatsAppClient[jid].Connect()
+			if err != nil {
+				return "", 0, err
+			}
+			// Request pairing code
+			code, errp := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Chrome ("+WhatsAppUserAgentName+")")
+			if errp != nil {
+				return "", 0, errp
+			}
+			// Set WhatsApp Client Presence to Available
+			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
+
+			return code, 160, nil
+		} else {
+			// Device ID is Exist
+			// Reconnect WebSocket
+			err := WhatsAppReconnect(jid)
+			if err != nil {
+				return "", 0, err
+			}
+
+			return "WhatsApp Client is Reconnected", 0, nil
+		}
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", 0, errors.New("WhatsApp Client is not Valid")
+}
+
 func WhatsAppReconnect(jid string) error {
 	if WhatsAppClient[jid] != nil {
 		// Make Sure WebSocket Connection is Disconnected
