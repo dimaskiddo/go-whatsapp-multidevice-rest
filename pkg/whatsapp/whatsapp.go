@@ -33,6 +33,7 @@ var (
 	WhatsAppClientProxyURL string
 	WhatsAppUserAgentName  string
 	WhatsAppUserAgentType  string
+	WhatsAppPairAgentType  whatsmeow.PairClientType
 )
 
 func init() {
@@ -64,6 +65,8 @@ func init() {
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client User Agent Type")
 	}
+
+	WhatsAppPairAgentType = WhatsAppGetPairAgent(WhatsAppUserAgentType)
 
 	WhatsAppDatastore = datastore
 }
@@ -139,16 +142,41 @@ func WhatsAppGetUserAgent(agentType string) waproto.DeviceProps_PlatformType {
 		return waproto.DeviceProps_EDGE
 	case "chrome":
 		return waproto.DeviceProps_CHROME
+	case "safari":
+		return waproto.DeviceProps_SAFARI
 	case "firefox":
 		return waproto.DeviceProps_FIREFOX
 	case "opera":
 		return waproto.DeviceProps_OPERA
+	case "uwp":
+		return waproto.DeviceProps_UWP
 	case "aloha":
 		return waproto.DeviceProps_ALOHA
 	case "tv-tcl":
 		return waproto.DeviceProps_TCL_TV
 	default:
 		return waproto.DeviceProps_UNKNOWN
+	}
+}
+
+func WhatsAppGetPairAgent(agentType string) whatsmeow.PairClientType {
+	switch strings.ToLower(agentType) {
+	case "ie":
+		return whatsmeow.PairClientIE
+	case "edge":
+		return whatsmeow.PairClientEdge
+	case "chrome":
+		return whatsmeow.PairClientChrome
+	case "safari":
+		return whatsmeow.PairClientSafari
+	case "firefox":
+		return whatsmeow.PairClientFirefox
+	case "opera":
+		return whatsmeow.PairClientOpera
+	case "uwp":
+		return whatsmeow.PairClientUWP
+	default:
+		return whatsmeow.PairClientOtherWebClient
 	}
 }
 
@@ -216,19 +244,22 @@ func WhatsAppLogin(jid string) (string, int, error) {
 
 func WhatsAppPairPhone(jid string) (string, int, error) {
 	if WhatsAppClient[jid] != nil {
+		// Make Sure WebSocket Connection is Disconnected
 		WhatsAppClient[jid].Disconnect()
 
 		if WhatsAppClient[jid].Store.ID == nil {
-			// Connect WebSocket while also Initialize QR Code Data
+			// Connect WebSocket while also Requesting Pairing Code
 			err := WhatsAppClient[jid].Connect()
 			if err != nil {
 				return "", 0, err
 			}
-			// Request pairing code
-			code, errp := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Chrome ("+WhatsAppUserAgentName+")")
-			if errp != nil {
-				return "", 0, errp
+
+			// Request Pairing Code
+			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppPairAgentType, WhatsAppUserAgentName)
+			if err != nil {
+				return "", 0, err
 			}
+
 			// Set WhatsApp Client Presence to Available
 			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
 
