@@ -33,7 +33,6 @@ var (
 	WhatsAppClientProxyURL string
 	WhatsAppUserAgentName  string
 	WhatsAppUserAgentType  string
-	WhatsAppPairAgentType  whatsmeow.PairClientType
 )
 
 func init() {
@@ -65,8 +64,6 @@ func init() {
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client User Agent Type")
 	}
-
-	WhatsAppPairAgentType = WhatsAppGetPairAgent(WhatsAppUserAgentType)
 
 	WhatsAppDatastore = datastore
 }
@@ -255,7 +252,7 @@ func WhatsAppPairPhone(jid string) (string, int, error) {
 			}
 
 			// Request Pairing Code
-			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppPairAgentType, WhatsAppUserAgentName)
+			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppGetPairAgent(WhatsAppUserAgentType), WhatsAppUserAgentName)
 			if err != nil {
 				return "", 0, err
 			}
