@@ -25,13 +25,13 @@ vendor:
 release:
 	make vendor
 	make clean-dist
-	goreleaser release --snapshot --skip-publish --rm-dist
+	goreleaser release --parallelism 1 --snapshot --skip-publish --rm-dist
 	echo "Release '$(SERVICE_NAME)' complete, please check dist directory."
 
 publish:
 	make vendor
 	make clean-dist
-	GITHUB_TOKEN=$(GITHUB_TOKEN) goreleaser release --rm-dist
+	GITHUB_TOKEN=$(GITHUB_TOKEN) goreleaser release --parallelism 1 --rm-dist
 	echo "Publish '$(SERVICE_NAME)' complete, please check your repository releases."
 
 build:
