@@ -1,4 +1,3 @@
-host: 127.0.0.1:3000
 info:
   contact:
     email: drh.dimasrestu@gmail.com
@@ -8,7 +7,7 @@ info:
   title: Go WhatsApp Multi-Device REST API
   version: 1.x
 paths:
-  /api/v1/whatsapp:
+  /:
     get:
       description: Get The Server Status
       produces:
@@ -19,7 +18,7 @@ paths:
       summary: Show The Status of The Server
       tags:
       - Root
-  /api/v1/whatsapp/auth:
+  /auth:
     get:
       description: Get Authentication Token
       produces:
@@ -32,7 +31,7 @@ paths:
       summary: Generate Authentication Token
       tags:
       - Root
-  /api/v1/whatsapp/group:
+  /group:
     get:
       description: Get Joined Groups Information from WhatsApp
       produces:
@@ -45,7 +44,7 @@ paths:
       summary: Get Joined Groups Information
       tags:
       - WhatsApp Information
-  /api/v1/whatsapp/login:
+  /login:
     post:
       consumes:
       - multipart/form-data
@@ -70,7 +69,7 @@ paths:
       summary: Generate QR Code for WhatsApp Multi-Device Login
       tags:
       - WhatsApp Authentication
-  /api/v1/whatsapp/login/pair:
+  /login/pair:
     post:
       consumes:
       - multipart/form-data
@@ -85,7 +84,7 @@ paths:
       summary: Pair Phone for WhatsApp Multi-Device Login
       tags:
       - WhatsApp Authentication
-  /api/v1/whatsapp/logout:
+  /logout:
     post:
       description: Make Device Logout from WhatsApp Multi-Device
       produces:
@@ -98,7 +97,7 @@ paths:
       summary: Logout Device from WhatsApp Multi-Device
       tags:
       - WhatsApp Authentication
-  /api/v1/whatsapp/registered:
+  /registered:
     get:
       description: Check WhatsApp Personal ID is Registered
       parameters:
@@ -117,7 +116,7 @@ paths:
       summary: Check If WhatsApp Personal ID is Registered
       tags:
       - WhatsApp Information
-  /api/v1/whatsapp/send/audio:
+  /send/audio:
     post:
       consumes:
       - multipart/form-data
@@ -143,7 +142,7 @@ paths:
       summary: Send Audio Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/contact:
+  /send/contact:
     post:
       consumes:
       - multipart/form-data
@@ -175,7 +174,7 @@ paths:
       summary: Send Contact Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/document:
+  /send/document:
     post:
       consumes:
       - multipart/form-data
@@ -202,7 +201,7 @@ paths:
       summary: Send Document Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/image:
+  /send/image:
     post:
       consumes:
       - multipart/form-data
@@ -238,7 +237,7 @@ paths:
       summary: Send Image Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/link:
+  /send/link:
     post:
       consumes:
       - multipart/form-data
@@ -268,7 +267,7 @@ paths:
       summary: Send Link Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/location:
+  /send/location:
     post:
       consumes:
       - multipart/form-data
@@ -300,7 +299,7 @@ paths:
       summary: Send Location Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/sticker:
+  /send/sticker:
     post:
       consumes:
       - multipart/form-data
@@ -327,7 +326,7 @@ paths:
       summary: Send Sticker Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/text:
+  /send/text:
     post:
       consumes:
       - multipart/form-data
@@ -353,7 +352,7 @@ paths:
       summary: Send Text Message
       tags:
       - WhatsApp Message
-  /api/v1/whatsapp/send/video:
+  /send/video:
     post:
       consumes:
       - multipart/form-data
@@ -389,8 +388,6 @@ paths:
       summary: Send Video Message
       tags:
       - WhatsApp Message
-schemes:
-- http
 securityDefinitions:
   BasicAuth:
     type: basic

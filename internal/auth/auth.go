@@ -20,7 +20,7 @@ import (
 // @Produce     json
 // @Success     200
 // @Security    BasicAuth
-// @Router      /api/v1/whatsapp/auth [get]
+// @Router      /auth [get]
 func Auth(c echo.Context) error {
 	var reqAuthBasicInfo typAuth.RequestAuthBasicInfo
 	var resAuthJWTData typAuth.ResponseAuthJWTData

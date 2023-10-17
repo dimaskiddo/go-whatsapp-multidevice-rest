@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/whatsapp": {
+        "/": {
             "get": {
                 "description": "Get The Server Status",
                 "produces": [
@@ -36,7 +36,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/auth": {
+        "/auth": {
             "get": {
                 "security": [
                     {
@@ -58,7 +58,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/group": {
+        "/group": {
             "get": {
                 "security": [
                     {
@@ -80,7 +80,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/login": {
+        "/login": {
             "post": {
                 "security": [
                     {
@@ -119,7 +119,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/login/pair": {
+        "/login/pair": {
             "post": {
                 "security": [
                     {
@@ -144,7 +144,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/logout": {
+        "/logout": {
             "post": {
                 "security": [
                     {
@@ -166,7 +166,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/registered": {
+        "/registered": {
             "get": {
                 "security": [
                     {
@@ -197,7 +197,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/audio": {
+        "/send/audio": {
             "post": {
                 "security": [
                     {
@@ -238,7 +238,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/contact": {
+        "/send/contact": {
             "post": {
                 "security": [
                     {
@@ -286,7 +286,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/document": {
+        "/send/document": {
             "post": {
                 "security": [
                     {
@@ -327,7 +327,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/image": {
+        "/send/image": {
             "post": {
                 "security": [
                     {
@@ -382,7 +382,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/link": {
+        "/send/link": {
             "post": {
                 "security": [
                     {
@@ -429,7 +429,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/location": {
+        "/send/location": {
             "post": {
                 "security": [
                     {
@@ -477,7 +477,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/sticker": {
+        "/send/sticker": {
             "post": {
                 "security": [
                     {
@@ -518,7 +518,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/text": {
+        "/send/text": {
             "post": {
                 "security": [
                     {
@@ -559,7 +559,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/whatsapp/send/video": {
+        "/send/video": {
             "post": {
                 "security": [
                     {
@@ -630,9 +630,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.x",
-	Host:             "127.0.0.1:3000",
+	Host:             "",
 	BasePath:         "",
-	Schemes:          []string{"http"},
+	Schemes:          []string{},
 	Title:            "Go WhatsApp Multi-Device REST API",
 	Description:      "This is WhatsApp Multi-Device Implementation in Go REST API",
 	InfoInstanceName: "swagger",

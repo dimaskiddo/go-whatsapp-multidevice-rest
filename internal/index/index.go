@@ -12,7 +12,7 @@ import (
 // @Tags        Root
 // @Produce     json
 // @Success     200
-// @Router      /api/v1/whatsapp [get]
+// @Router      / [get]
 func Index(c echo.Context) error {
 	return router.ResponseSuccess(c, "Go WhatsApp Multi-Device REST is running")
 }

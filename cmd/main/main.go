@@ -8,9 +8,6 @@ package main
 // @contact.url https://github.com/dimaskiddo
 // @contact.email drh.dimasrestu@gmail.com
 
-// @schemes http
-// @host 127.0.0.1:3000
-
 // @securityDefinitions.basic BasicAuth
 
 // @securityDefinitions.apikey BearerAuth

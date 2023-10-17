@@ -1,7 +1,4 @@
 {
-    "schemes": [
-        "http"
-    ],
     "swagger": "2.0",
     "info": {
         "description": "This is WhatsApp Multi-Device Implementation in Go REST API",
@@ -13,9 +10,8 @@
         },
         "version": "1.x"
     },
-    "host": "127.0.0.1:3000",
     "paths": {
-        "/api/v1/whatsapp": {
+        "/": {
             "get": {
                 "description": "Get The Server Status",
                 "produces": [
@@ -32,7 +28,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/auth": {
+        "/auth": {
             "get": {
                 "security": [
                     {
@@ -54,7 +50,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/group": {
+        "/group": {
             "get": {
                 "security": [
                     {
@@ -76,7 +72,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/login": {
+        "/login": {
             "post": {
                 "security": [
                     {
@@ -115,7 +111,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/login/pair": {
+        "/login/pair": {
             "post": {
                 "security": [
                     {
@@ -140,7 +136,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/logout": {
+        "/logout": {
             "post": {
                 "security": [
                     {
@@ -162,7 +158,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/registered": {
+        "/registered": {
             "get": {
                 "security": [
                     {
@@ -193,7 +189,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/audio": {
+        "/send/audio": {
             "post": {
                 "security": [
                     {
@@ -234,7 +230,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/contact": {
+        "/send/contact": {
             "post": {
                 "security": [
                     {
@@ -282,7 +278,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/document": {
+        "/send/document": {
             "post": {
                 "security": [
                     {
@@ -323,7 +319,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/image": {
+        "/send/image": {
             "post": {
                 "security": [
                     {
@@ -378,7 +374,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/link": {
+        "/send/link": {
             "post": {
                 "security": [
                     {
@@ -425,7 +421,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/location": {
+        "/send/location": {
             "post": {
                 "security": [
                     {
@@ -473,7 +469,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/sticker": {
+        "/send/sticker": {
             "post": {
                 "security": [
                     {
@@ -514,7 +510,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/text": {
+        "/send/text": {
             "post": {
                 "security": [
                     {
@@ -555,7 +551,7 @@
                 }
             }
         },
-        "/api/v1/whatsapp/send/video": {
+        "/send/video": {
             "post": {
                 "security": [
                     {

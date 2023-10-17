@@ -47,7 +47,7 @@ func convertFileToBytes(file multipart.File) ([]byte, error) {
 // @Param       output    formData  string  false  "Change Output Format in HTML or JSON"  Enums(html, json)  default(html)
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/login [post]
+// @Router      /login [post]
 func Login(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -109,7 +109,7 @@ func Login(c echo.Context) error {
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/login/pair [post]
+// @Router      /login/pair [post]
 func LoginPair(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -143,7 +143,7 @@ func LoginPair(c echo.Context) error {
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/logout [post]
+// @Router      /logout [post]
 func Logout(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -164,7 +164,7 @@ func Logout(c echo.Context) error {
 // @Param       msisdn    query  string  true  "WhatsApp Personal ID to Check"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/registered [get]
+// @Router      /registered [get]
 func Registered(c echo.Context) error {
 	jid := jwtPayload(c).JID
 	remoteJID := strings.TrimSpace(c.QueryParam("msisdn"))
@@ -188,7 +188,7 @@ func Registered(c echo.Context) error {
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/group [get]
+// @Router      /group [get]
 func GetGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -211,7 +211,7 @@ func GetGroup(c echo.Context) error {
 // @Param       message   formData  string  true  "Text Message"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/text [post]
+// @Router      /send/text [post]
 func SendText(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -248,7 +248,7 @@ func SendText(c echo.Context) error {
 // @Param       longitude formData  number  true  "Location Longitude"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/location [post]
+// @Router      /send/location [post]
 func SendLocation(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -290,7 +290,7 @@ func SendLocation(c echo.Context) error {
 // @Param       phone     formData  string  true  "Contact Phone"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/contact [post]
+// @Router      /send/contact [post]
 func SendContact(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -332,7 +332,7 @@ func SendContact(c echo.Context) error {
 // @Param       url       formData  string  true  "Link URL"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/link [post]
+// @Router      /send/link [post]
 func SendLink(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -369,7 +369,7 @@ func SendLink(c echo.Context) error {
 // @Param       document  formData  file    true  "Document File"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/document [post]
+// @Router      /send/document [post]
 func SendDocument(c echo.Context) error {
 	return sendMedia(c, "document")
 }
@@ -386,7 +386,7 @@ func SendDocument(c echo.Context) error {
 // @Param       viewonce  formData  bool    false "Is View Once"              default(false)
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/image [post]
+// @Router      /send/image [post]
 func SendImage(c echo.Context) error {
 	return sendMedia(c, "image")
 }
@@ -401,7 +401,7 @@ func SendImage(c echo.Context) error {
 // @Param       audio     formData  file    true  "Audio File"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/audio [post]
+// @Router      /send/audio [post]
 func SendAudio(c echo.Context) error {
 	return sendMedia(c, "audio")
 }
@@ -418,7 +418,7 @@ func SendAudio(c echo.Context) error {
 // @Param       viewonce  formData  bool    false "Is View Once"              default(false)
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/video [post]
+// @Router      /send/video [post]
 func SendVideo(c echo.Context) error {
 	return sendMedia(c, "video")
 }
@@ -433,7 +433,7 @@ func SendVideo(c echo.Context) error {
 // @Param       sticker   formData  file    true  "Sticker File"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /api/v1/whatsapp/send/sticker [post]
+// @Router      /send/sticker [post]
 func SendSticker(c echo.Context) error {
 	return sendMedia(c, "sticker")
 }
