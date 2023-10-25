@@ -183,6 +183,8 @@ func WhatsAppGetPairName(agentType string) string {
 	switch agentType {
 	case "ie":
 		prefix = "Internet Explorer"
+	case "edge":
+		prefix = "Microsoft Edge"
 	case "uwp":
 		prefix = "UWP"
 	default:
