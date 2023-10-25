@@ -191,13 +191,13 @@ func WhatsAppGetPairName(agentType string) string {
 
 	switch runtime.GOOS {
 	case "windows":
-		return prefix + "(Windows)"
+		return prefix + " (Windows)"
 	case "darwin":
-		return prefix + "(macOS)"
+		return prefix + " (macOS)"
 	case "linux":
-		return prefix + "(Linux)"
+		return prefix + " (Linux)"
 	default:
-		return prefix + "(" + WhatsAppUserAgentName + ")"
+		return prefix + " (" + WhatsAppUserAgentName + ")"
 	}
 }
 
