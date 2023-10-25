@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"runtime"
 	"strings"
 
 	"github.com/PuerkitoBio/goquery"
@@ -177,6 +178,29 @@ func WhatsAppGetPairAgent(agentType string) whatsmeow.PairClientType {
 	}
 }
 
+func WhatsAppGetPairName(agentType string) string {
+	var prefix string
+	switch agentType {
+	case "ie":
+		prefix = "Internet Explorer"
+	case "uwp":
+		prefix = "UWP"
+	default:
+		prefix = strings.Title(agentType)
+	}
+
+	switch runtime.GOOS {
+	case "windows":
+		return prefix + "(Windows)"
+	case "darwin":
+		return prefix + "(macOS)"
+	case "linux":
+		return prefix + "(Linux)"
+	default:
+		return prefix + "(" + WhatsAppUserAgentName + ")"
+	}
+}
+
 func WhatsAppGenerateQR(qrChan <-chan whatsmeow.QRChannelItem) (string, int) {
 	qrChanCode := make(chan string)
 	qrChanTimeout := make(chan int)
@@ -252,7 +276,7 @@ func WhatsAppLoginPair(jid string) (string, int, error) {
 			}
 
 			// Request Pairing Code
-			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppGetPairAgent(WhatsAppUserAgentType), WhatsAppUserAgentName)
+			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppGetPairAgent(WhatsAppUserAgentType), WhatsAppGetPairName(WhatsAppUserAgentType))
 			if err != nil {
 				return "", 0, err
 			}
