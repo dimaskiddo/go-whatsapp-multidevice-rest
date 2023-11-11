@@ -32,8 +32,6 @@ var WhatsAppClient = make(map[string]*whatsmeow.Client)
 
 var (
 	WhatsAppClientProxyURL string
-	WhatsAppUserAgentName  string
-	WhatsAppUserAgentType  string
 )
 
 func init() {
@@ -56,16 +54,6 @@ func init() {
 
 	WhatsAppClientProxyURL, _ = env.GetEnvString("WHATSAPP_CLIENT_PROXY_URL")
 
-	WhatsAppUserAgentName, err = env.GetEnvString("WHATSAPP_USER_AGENT_NAME")
-	if err != nil {
-		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client User Agent Name")
-	}
-
-	WhatsAppUserAgentType, err = env.GetEnvString("WHATSAPP_USER_AGENT_TYPE")
-	if err != nil {
-		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client User Agent Type")
-	}
-
 	WhatsAppDatastore = datastore
 }
 
@@ -79,8 +67,8 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		}
 
 		// Set Client Properties
-		store.DeviceProps.Os = proto.String(WhatsAppUserAgentName)
-		store.DeviceProps.PlatformType = WhatsAppGetUserAgent(WhatsAppUserAgentType).Enum()
+		store.DeviceProps.Os = proto.String(WhatsAppGetUserOS())
+		store.DeviceProps.PlatformType = WhatsAppGetUserAgent("chrome").Enum()
 		store.DeviceProps.RequireFullSync = proto.Bool(false)
 
 		// Set Client Versions
@@ -157,49 +145,14 @@ func WhatsAppGetUserAgent(agentType string) waproto.DeviceProps_PlatformType {
 	}
 }
 
-func WhatsAppGetPairAgent(agentType string) whatsmeow.PairClientType {
-	switch strings.ToLower(agentType) {
-	case "ie":
-		return whatsmeow.PairClientIE
-	case "edge":
-		return whatsmeow.PairClientEdge
-	case "chrome":
-		return whatsmeow.PairClientChrome
-	case "safari":
-		return whatsmeow.PairClientSafari
-	case "firefox":
-		return whatsmeow.PairClientFirefox
-	case "opera":
-		return whatsmeow.PairClientOpera
-	case "uwp":
-		return whatsmeow.PairClientUWP
-	default:
-		return whatsmeow.PairClientOtherWebClient
-	}
-}
-
-func WhatsAppGetPairName(agentType string) string {
-	var prefix string
-	switch agentType {
-	case "ie":
-		prefix = "Internet Explorer"
-	case "edge":
-		prefix = "Microsoft Edge"
-	case "uwp":
-		prefix = "UWP"
-	default:
-		prefix = strings.Title(agentType)
-	}
-
+func WhatsAppGetUserOS() string {
 	switch runtime.GOOS {
 	case "windows":
-		return prefix + " (Windows)"
-	case "darwin":
-		return prefix + " (macOS)"
+		return "Windows"
 	case "linux":
-		return prefix + " (Linux)"
+		return "Linux"
 	default:
-		return prefix + " (" + WhatsAppUserAgentName + ")"
+		return "Mac OS"
 	}
 }
 
@@ -278,7 +231,7 @@ func WhatsAppLoginPair(jid string) (string, int, error) {
 			}
 
 			// Request Pairing Code
-			code, err := WhatsAppClient[jid].PairPhone(jid, true, WhatsAppGetPairAgent(WhatsAppUserAgentType), WhatsAppGetPairName(WhatsAppUserAgentType))
+			code, err := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Google Chrome ("+WhatsAppGetUserOS()+")")
 			if err != nil {
 				return "", 0, err
 			}

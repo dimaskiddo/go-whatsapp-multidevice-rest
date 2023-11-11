@@ -5,10 +5,10 @@ go 1.19
 require (
 	github.com/PuerkitoBio/goquery v1.8.1
 	github.com/SporkHubr/echo-http-cache v0.0.0-20200706100054-1d7ae9f38029
-	github.com/go-playground/validator/v10 v10.15.5
+	github.com/go-playground/validator/v10 v10.16.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1
-	github.com/labstack/echo/v4 v4.11.2
+	github.com/labstack/echo/v4 v4.11.3
 	github.com/lib/pq v1.10.9
 	github.com/nickalie/go-webpbin v0.0.0-20220110095747-f10016bf2dc1
 	github.com/robfig/cron/v3 v3.0.1
@@ -17,7 +17,7 @@ require (
 	github.com/sunshineplan/imgconv v1.1.5
 	github.com/swaggo/echo-swagger v1.4.1
 	github.com/swaggo/swag v1.16.2
-	go.mau.fi/whatsmeow v0.0.0-20231016102050-3a30a129b626
+	go.mau.fi/whatsmeow v0.0.0-20231110185952-cfd1bea9628a
 	google.golang.org/protobuf v1.31.0
 	modernc.org/sqlite v1.17.0
 )
