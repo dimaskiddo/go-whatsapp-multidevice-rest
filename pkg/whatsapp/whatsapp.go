@@ -149,10 +149,10 @@ func WhatsAppGetUserOS() string {
 	switch runtime.GOOS {
 	case "windows":
 		return "Windows"
-	case "linux":
-		return "Linux"
+	case "darwin":
+		return "macOS"
 	default:
-		return "Mac OS"
+		return "Linux"
 	}
 }
 
@@ -231,7 +231,7 @@ func WhatsAppLoginPair(jid string) (string, int, error) {
 			}
 
 			// Request Pairing Code
-			code, err := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Google Chrome ("+WhatsAppGetUserOS()+")")
+			code, err := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Chrome ("+WhatsAppGetUserOS()+")")
 			if err != nil {
 				return "", 0, err
 			}
