@@ -18,6 +18,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"go.mau.fi/whatsmeow"
+	wabin "go.mau.fi/whatsmeow/binary"
 	waproto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
@@ -59,6 +60,7 @@ func init() {
 
 func WhatsAppInitClient(device *store.Device, jid string) {
 	var err error
+	wabin.IndentXML = true
 
 	if WhatsAppClient[jid] == nil {
 		if device == nil {
@@ -70,6 +72,11 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		store.DeviceProps.Os = proto.String(WhatsAppGetUserOS())
 		store.DeviceProps.PlatformType = WhatsAppGetUserAgent("chrome").Enum()
 		store.DeviceProps.RequireFullSync = proto.Bool(false)
+		store.DeviceProps.HistorySyncConfig = &waproto.DeviceProps_HistorySyncConfig{
+			FullSyncDaysLimit:   proto.Uint32(1),
+			FullSyncSizeMbLimit: proto.Uint32(10),
+			StorageQuotaMb:      proto.Uint32(10),
+		}
 
 		// Set Client Versions
 		version.Major, err = env.GetEnvInt("WHATSAPP_VERSION_MAJOR")
@@ -99,6 +106,9 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 
 		// Set WhatsApp Client Auto Trust Identity
 		WhatsAppClient[jid].AutoTrustIdentity = true
+
+		// Disable Self Broadcast
+		WhatsAppClient[jid].DontSendSelfBroadcast = true
 	}
 }
 
@@ -197,9 +207,6 @@ func WhatsAppLogin(jid string) (string, int, error) {
 			// Get Generated QR Code and Timeout Information
 			qrImage, qrTimeout := WhatsAppGenerateQR(qrChanGenerate)
 
-			// Set WhatsApp Client Presence to Available
-			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
-
 			// Return QR Code in Base64 Format and Timeout Information
 			return "data:image/png;base64," + qrImage, qrTimeout, nil
 		} else {
@@ -236,9 +243,6 @@ func WhatsAppLoginPair(jid string) (string, int, error) {
 				return "", 0, err
 			}
 
-			// Set WhatsApp Client Presence to Available
-			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
-
 			return code, 160, nil
 		} else {
 			// Device ID is Exist
@@ -269,9 +273,6 @@ func WhatsAppReconnect(jid string) error {
 				return err
 			}
 
-			// Set WhatsApp Client Presence to Available
-			_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
-
 			return nil
 		}
 
@@ -288,7 +289,7 @@ func WhatsAppLogout(jid string) error {
 			var err error
 
 			// Set WhatsApp Client Presence to Unavailable
-			_ = WhatsAppClient[jid].SendPresence(types.PresenceUnavailable)
+			WhatsAppPresence(jid, false)
 
 			// Logout WhatsApp Client and Disconnect from WebSocket
 			err = WhatsAppClient[jid].Logout()
@@ -383,6 +384,14 @@ func WhatsAppDecomposeJID(id string) string {
 	return id
 }
 
+func WhatsAppPresence(jid string, isAvailable bool) {
+	if isAvailable {
+		_ = WhatsAppClient[jid].SendPresence(types.PresenceAvailable)
+	} else {
+		_ = WhatsAppClient[jid].SendPresence(types.PresenceUnavailable)
+	}
+}
+
 func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio bool) {
 	// Set Compose Status
 	var typeCompose types.ChatPresence
@@ -424,8 +433,12 @@ func WhatsAppSendText(ctx context.Context, jid string, rjid string, message stri
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
@@ -468,8 +481,12 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
@@ -515,8 +532,12 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Upload File to WhatsApp Storage Server
 		fileUploaded, err := WhatsAppClient[jid].Upload(ctx, fileBytes, whatsmeow.MediaDocument)
@@ -575,8 +596,12 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Issue #7 Old Version Client Cannot Render WebP Format
 		// If MIME Type is "image/webp" Then Convert it as PNG
@@ -770,8 +795,12 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Upload Video to WhatsApp Storage Server
 		videoUploaded, err := WhatsAppClient[jid].Upload(ctx, videoBytes, whatsmeow.MediaVideo)
@@ -830,8 +859,12 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
@@ -880,8 +913,12 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		// Get URL Metadata
 		urlResponse, err := http.Get(linkURL)
@@ -961,8 +998,12 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 		}
 
 		// Set Chat Presence
+		WhatsAppPresence(jid, true)
 		WhatsAppComposeStatus(jid, remoteJID, true, false)
-		defer WhatsAppComposeStatus(jid, remoteJID, false, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
 
 		stickerConvDecode, err := imgconv.Decode(bytes.NewReader(stickerBytes))
 		if err != nil {
