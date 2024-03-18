@@ -28,6 +28,13 @@ type RequestSendLink struct {
 	URL     string
 }
 
+type RequestSendPoll struct {
+	RJID           string
+	Question       string
+	Options        []string
+	MultipleAnswer bool
+}
+
 type RequestMessage struct {
 	RJID    string
 	MSGID   string
