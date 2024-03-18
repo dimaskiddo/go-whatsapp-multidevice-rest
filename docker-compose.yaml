@@ -1,0 +1,22 @@
+version: '2'
+
+networks:
+  whatsapp:
+    driver: bridge
+
+services:
+  go-whatsapp-multidevice-rest:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: 'dimaskiddo/go-whatsapp-multidevice-rest:latest'
+    container_name: 'go-whatsapp-multidevice-rest'
+    networks:
+      - whatsapp
+    ports:
+      - 3000:3000
+    env_file:
+      - ./.env
+    volumes:
+      - ./dbs:/usr/app/go-whatsapp-multidevice-rest/dbs
+    restart: unless-stopped

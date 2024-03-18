@@ -21,7 +21,7 @@ func Routines(cron *cron.Cron) {
 				// Mask JID for Logging Information
 				maskJID := realJID[0:len(realJID)-4] + "xxxx"
 
-				// Print Log Show Information of Device Chenking
+				// Print Log Show Information of Device Checking
 				log.Print(nil).Info("Checking WhatsApp Client for " + maskJID)
 
 				// Check WhatsAppClient Registered JID with Authenticated MSISDN
