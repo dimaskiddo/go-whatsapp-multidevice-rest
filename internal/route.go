@@ -10,8 +10,6 @@ import (
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/auth"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 
-	_ "github.com/dimaskiddo/go-whatsapp-multidevice-rest/docs"
-
 	ctlAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth"
 	typAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth/types"
 
