@@ -15,6 +15,7 @@ builds:
   goarch:
     - 386
     - amd64
+    - arm64
 archives:
 - replacements:
     darwin: macos
@@ -22,6 +23,7 @@ archives:
     windows: windows
     386: 32-bit
     amd64: 64-bit
+    arm64: arm-64-bit
   format: zip
   files:
     - LICENSE
