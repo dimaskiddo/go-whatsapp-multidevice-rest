@@ -447,6 +447,8 @@ func WhatsAppCheckRegistered(jid string, id string) error {
 		if remoteJID.IsEmpty() || remoteJID.Server == types.GroupServer {
 			return errors.New("WhatsApp Personal ID is Not Registered")
 		}
+
+		return nil
 	}
 
 	// Return Error WhatsApp Client is not Valid
