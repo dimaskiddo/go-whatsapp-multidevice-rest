@@ -70,9 +70,67 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Information"
+                    "WhatsApp Group"
                 ],
                 "summary": "Get Joined Groups Information",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Joining to Group From Invitation Link from WhatsApp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Group"
+                ],
+                "summary": "Join Group From Invitation Link",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group Invitation Link",
+                        "name": "link",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Leaving Group By Group ID from WhatsApp",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Group"
+                ],
+                "summary": "Leave Group By Group ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Group ID",
+                        "name": "gid",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -166,6 +224,93 @@ const docTemplate = `{
                 }
             }
         },
+        "/message": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Update Message to Spesific WhatsApp Personal ID or Group ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Message"
+                ],
+                "summary": "Update Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message ID",
+                        "name": "messageid",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Text Message",
+                        "name": "message",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete Message to Spesific WhatsApp Personal ID or Group ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Message"
+                ],
+                "summary": "Delete Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message ID",
+                        "name": "messageid",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/registered": {
             "get": {
                 "security": [
@@ -212,7 +357,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Audio Message",
                 "parameters": [
@@ -253,7 +398,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Contact Message",
                 "parameters": [
@@ -301,7 +446,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Document Message",
                 "parameters": [
@@ -342,7 +487,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Image Message",
                 "parameters": [
@@ -397,7 +542,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Link Message",
                 "parameters": [
@@ -444,7 +589,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Location Message",
                 "parameters": [
@@ -492,7 +637,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Sticker Message",
                 "parameters": [
@@ -533,7 +678,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Text Message",
                 "parameters": [
@@ -574,7 +719,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "WhatsApp Message"
+                    "WhatsApp Send Message"
                 ],
                 "summary": "Send Video Message",
                 "parameters": [

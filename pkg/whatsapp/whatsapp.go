@@ -72,11 +72,6 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		store.DeviceProps.Os = proto.String(WhatsAppGetUserOS())
 		store.DeviceProps.PlatformType = WhatsAppGetUserAgent("chrome").Enum()
 		store.DeviceProps.RequireFullSync = proto.Bool(false)
-		store.DeviceProps.HistorySyncConfig = &waproto.DeviceProps_HistorySyncConfig{
-			FullSyncDaysLimit:   proto.Uint32(1),
-			FullSyncSizeMbLimit: proto.Uint32(10),
-			StorageQuotaMb:      proto.Uint32(10),
-		}
 
 		// Set Client Versions
 		version.Major, err = env.GetEnvInt("WHATSAPP_VERSION_MAJOR")
@@ -442,7 +437,7 @@ func WhatsAppSendText(ctx context.Context, jid string, rjid string, message stri
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			Conversation: proto.String(message),
@@ -490,7 +485,7 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			LocationMessage: &waproto.LocationMessage{
@@ -547,7 +542,7 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			DocumentMessage: &waproto.DocumentMessage{
@@ -684,7 +679,7 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			ImageMessage: &waproto.ImageMessage{
@@ -748,7 +743,7 @@ func WhatsAppSendAudio(ctx context.Context, jid string, rjid string, audioBytes 
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			AudioMessage: &waproto.AudioMessage{
@@ -810,7 +805,7 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			VideoMessage: &waproto.VideoMessage{
@@ -868,7 +863,7 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgVCard := fmt.Sprintf("BEGIN:VCARD\nVERSION:3.0\nN:;%v;;;\nFN:%v\nTEL;type=CELL;waid=%v:+%v\nEND:VCARD",
 			contactName, contactName, contactNumber, contactNumber)
@@ -947,7 +942,7 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgText := linkURL
 
@@ -1028,7 +1023,7 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 
 		// Compose WhatsApp Proto
 		msgExtra := whatsmeow.SendRequestExtra{
-			ID: whatsmeow.GenerateMessageID(),
+			ID: WhatsAppClient[jid].GenerateMessageID(),
 		}
 		msgContent := &waproto.Message{
 			StickerMessage: &waproto.StickerMessage{
@@ -1055,7 +1050,92 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppGetGroup(jid string) ([]types.GroupInfo, error) {
+func WhatsAppMessageUpdate(ctx context.Context, jid string, rjid string, msgid string, message string) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Compose New Remote JID
+		remoteJID := WhatsAppComposeJID(rjid)
+		if remoteJID.Server != types.GroupServer {
+			// Validate JID if Remote JID is not Gorup JID
+			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+				return "", errors.New("WhatsApp Personal ID is Not Registered")
+			}
+		}
+
+		// Set Chat Presence
+		WhatsAppPresence(jid, true)
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
+
+		// Compose WhatsApp Proto
+		msgContent := &waproto.Message{
+			Conversation: proto.String(message),
+		}
+
+		// Send WhatsApp Message Proto in Edit Mode
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, WhatsAppClient[jid].BuildEdit(remoteJID, msgid, msgContent))
+		if err != nil {
+			return "", err
+		}
+
+		return msgid, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppMessageDelete(ctx context.Context, jid string, rjid string, msgid string) error {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Compose New Remote JID
+		remoteJID := WhatsAppComposeJID(rjid)
+		if remoteJID.Server != types.GroupServer {
+			// Validate JID if Remote JID is not Gorup JID
+			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+				return errors.New("WhatsApp Personal ID is Not Registered")
+			}
+		}
+
+		// Set Chat Presence
+		WhatsAppPresence(jid, true)
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
+
+		// Send WhatsApp Message Proto in Revoke Mode
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, WhatsAppClient[jid].BuildRevoke(remoteJID, types.EmptyJID, msgid))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppGroupGet(jid string) ([]types.GroupInfo, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -1083,4 +1163,46 @@ func WhatsAppGetGroup(jid string) ([]types.GroupInfo, error) {
 
 	// Return Error WhatsApp Client is not Valid
 	return nil, errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppGroupJoin(jid string, link string) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Join Group By Invitation Link
+		gid, err := WhatsAppClient[jid].JoinGroupWithLink(link)
+		if err != nil {
+			return "", err
+		}
+
+		// Return Joined Group ID
+		return gid.String(), nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppGroupLeave(jid string, gid string) error {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Leave Group By Group ID
+		return WhatsAppClient[jid].LeaveGroup(WhatsAppComposeJID(gid))
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
 }

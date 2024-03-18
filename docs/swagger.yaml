@@ -32,6 +32,24 @@ paths:
       tags:
       - Root
   /group:
+    delete:
+      description: Leaving Group By Group ID from WhatsApp
+      parameters:
+      - description: Group ID
+        in: formData
+        name: gid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Leave Group By Group ID
+      tags:
+      - WhatsApp Group
     get:
       description: Get Joined Groups Information from WhatsApp
       produces:
@@ -43,7 +61,25 @@ paths:
       - BearerAuth: []
       summary: Get Joined Groups Information
       tags:
-      - WhatsApp Information
+      - WhatsApp Group
+    post:
+      description: Joining to Group From Invitation Link from WhatsApp
+      parameters:
+      - description: Group Invitation Link
+        in: formData
+        name: link
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Join Group From Invitation Link
+      tags:
+      - WhatsApp Group
   /login:
     post:
       consumes:
@@ -97,6 +133,62 @@ paths:
       summary: Logout Device from WhatsApp Multi-Device
       tags:
       - WhatsApp Authentication
+  /message:
+    delete:
+      consumes:
+      - multipart/form-data
+      description: Delete Message to Spesific WhatsApp Personal ID or Group ID
+      parameters:
+      - description: Destination WhatsApp Personal ID or Group ID
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Message ID
+        in: formData
+        name: messageid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Delete Message
+      tags:
+      - WhatsApp Message
+    post:
+      consumes:
+      - multipart/form-data
+      description: Update Message to Spesific WhatsApp Personal ID or Group ID
+      parameters:
+      - description: Destination WhatsApp Personal ID or Group ID
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Message ID
+        in: formData
+        name: messageid
+        required: true
+        type: string
+      - description: Text Message
+        in: formData
+        name: message
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Update Message
+      tags:
+      - WhatsApp Message
   /registered:
     get:
       description: Check WhatsApp Personal ID is Registered
@@ -141,7 +233,7 @@ paths:
       - BearerAuth: []
       summary: Send Audio Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/contact:
     post:
       consumes:
@@ -173,7 +265,7 @@ paths:
       - BearerAuth: []
       summary: Send Contact Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/document:
     post:
       consumes:
@@ -200,7 +292,7 @@ paths:
       - BearerAuth: []
       summary: Send Document Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/image:
     post:
       consumes:
@@ -236,7 +328,7 @@ paths:
       - BearerAuth: []
       summary: Send Image Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/link:
     post:
       consumes:
@@ -266,7 +358,7 @@ paths:
       - BearerAuth: []
       summary: Send Link Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/location:
     post:
       consumes:
@@ -298,7 +390,7 @@ paths:
       - BearerAuth: []
       summary: Send Location Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/sticker:
     post:
       consumes:
@@ -325,7 +417,7 @@ paths:
       - BearerAuth: []
       summary: Send Sticker Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/text:
     post:
       consumes:
@@ -351,7 +443,7 @@ paths:
       - BearerAuth: []
       summary: Send Text Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
   /send/video:
     post:
       consumes:
@@ -387,7 +479,7 @@ paths:
       - BearerAuth: []
       summary: Send Video Message
       tags:
-      - WhatsApp Message
+      - WhatsApp Send Message
 securityDefinitions:
   BasicAuth:
     type: basic

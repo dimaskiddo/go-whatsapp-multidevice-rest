@@ -27,3 +27,17 @@ type RequestSendLink struct {
 	Caption string
 	URL     string
 }
+
+type RequestMessage struct {
+	RJID    string
+	MSGID   string
+	Message string
+}
+
+type RequestGroupJoin struct {
+	Link string
+}
+
+type RequestGroupLeave struct {
+	GID string
+}

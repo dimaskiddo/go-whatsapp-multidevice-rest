@@ -184,7 +184,7 @@ func Registered(c echo.Context) error {
 // GetGroup
 // @Summary     Get Joined Groups Information
 // @Description Get Joined Groups Information from WhatsApp
-// @Tags        WhatsApp Information
+// @Tags        WhatsApp Group
 // @Produce     json
 // @Success     200
 // @Security    BearerAuth
@@ -193,7 +193,7 @@ func GetGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
-	group, err := pkgWhatsApp.WhatsAppGetGroup(jid)
+	group, err := pkgWhatsApp.WhatsAppGroupGet(jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -201,10 +201,66 @@ func GetGroup(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully List Joined Groups", group)
 }
 
+// JoinGroup
+// @Summary     Join Group From Invitation Link
+// @Description Joining to Group From Invitation Link from WhatsApp
+// @Tags        WhatsApp Group
+// @Produce     json
+// @Param       link    formData  string  true  "Group Invitation Link"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /group [post]
+func JoinGroup(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqGroupJoin typWhatsApp.RequestGroupJoin
+	reqGroupJoin.Link = strings.TrimSpace(c.FormValue("link"))
+
+	if len(reqGroupJoin.Link) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Link")
+	}
+
+	group, err := pkgWhatsApp.WhatsAppGroupJoin(jid, reqGroupJoin.Link)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully Joined Group From Invitation Link", group)
+}
+
+// LeaveGroup
+// @Summary     Leave Group By Group ID
+// @Description Leaving Group By Group ID from WhatsApp
+// @Tags        WhatsApp Group
+// @Produce     json
+// @Param       gid    formData  string  true  "Group ID"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /group [delete]
+func LeaveGroup(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqGroupLeave typWhatsApp.RequestGroupLeave
+	reqGroupLeave.GID = strings.TrimSpace(c.FormValue("gid"))
+
+	if len(reqGroupLeave.GID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value GID")
+	}
+
+	err = pkgWhatsApp.WhatsAppGroupLeave(jid, reqGroupLeave.GID)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Leave Group By Group ID")
+}
+
 // SendText
 // @Summary     Send Text Message
 // @Description Send Text Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -240,7 +296,7 @@ func SendText(c echo.Context) error {
 // SendLocation
 // @Summary     Send Location Message
 // @Description Send Location Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -282,7 +338,7 @@ func SendLocation(c echo.Context) error {
 // SendContact
 // @Summary     Send Contact Message
 // @Description Send Contact Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -324,7 +380,7 @@ func SendContact(c echo.Context) error {
 // SendLink
 // @Summary     Send Link Message
 // @Description Send Link Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -362,7 +418,7 @@ func SendLink(c echo.Context) error {
 // SendDocument
 // @Summary     Send Document Message
 // @Description Send Document Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -377,7 +433,7 @@ func SendDocument(c echo.Context) error {
 // SendImage
 // @Summary     Send Image Message
 // @Description Send Image Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -394,7 +450,7 @@ func SendImage(c echo.Context) error {
 // SendAudio
 // @Summary     Send Audio Message
 // @Description Send Audio Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -409,7 +465,7 @@ func SendAudio(c echo.Context) error {
 // SendVideo
 // @Summary     Send Video Message
 // @Description Send Video Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -426,7 +482,7 @@ func SendVideo(c echo.Context) error {
 // SendSticker
 // @Summary     Send Sticker Message
 // @Description Send Sticker Message to Spesific WhatsApp Personal ID or Group ID
-// @Tags        WhatsApp Message
+// @Tags        WhatsApp Send Message
 // @Accept      multipart/form-data
 // @Produce     json
 // @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
@@ -539,4 +595,81 @@ func sendMedia(c echo.Context, mediaType string) error {
 	}
 
 	return router.ResponseSuccessWithData(c, "Successfully Send Media Message", resSendMessage)
+}
+
+// MessageUpdate
+// @Summary     Update Message
+// @Description Update Message to Spesific WhatsApp Personal ID or Group ID
+// @Tags        WhatsApp Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
+// @Param       messageid formData  string  true  "Message ID"
+// @Param       message   formData  string  true  "Text Message"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /message [post]
+func MessageUpdate(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqMessageUpdate typWhatsApp.RequestMessage
+	reqMessageUpdate.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqMessageUpdate.MSGID = strings.TrimSpace(c.FormValue("messageid"))
+	reqMessageUpdate.Message = strings.TrimSpace(c.FormValue("message"))
+
+	if len(reqMessageUpdate.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqMessageUpdate.MSGID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MessageID")
+	}
+
+	if len(reqMessageUpdate.Message) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Message")
+	}
+
+	var resSendMessage typWhatsApp.ResponseSendMessage
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppMessageUpdate(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID, reqMessageUpdate.Message)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully Update Message", resSendMessage)
+}
+
+// MessageDelete
+// @Summary     Delete Message
+// @Description Delete Message to Spesific WhatsApp Personal ID or Group ID
+// @Tags        WhatsApp Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
+// @Param       messageid formData  string  true  "Message ID"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /message [delete]
+func MessageDelete(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqMessageUpdate typWhatsApp.RequestMessage
+	reqMessageUpdate.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqMessageUpdate.MSGID = strings.TrimSpace(c.FormValue("messageid"))
+
+	if len(reqMessageUpdate.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqMessageUpdate.MSGID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MessageID")
+	}
+
+	err = pkgWhatsApp.WhatsAppMessageDelete(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Delete Message")
 }
