@@ -394,6 +394,42 @@ paths:
       summary: Send Location Message
       tags:
       - WhatsApp Send Message
+  /send/poll:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Send Poll to Spesific WhatsApp Personal ID or Group ID
+      parameters:
+      - description: Destination WhatsApp Personal ID or Group ID
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Poll Question
+        in: formData
+        name: question
+        required: true
+        type: string
+      - description: Poll Options (Comma Seperated for New Options)
+        in: formData
+        name: options
+        required: true
+        type: string
+      - default: false
+        description: Is Multiple Answer
+        in: formData
+        name: multianswer
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: Send Poll
+      tags:
+      - WhatsApp Send Message
   /send/sticker:
     post:
       consumes:

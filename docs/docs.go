@@ -629,6 +629,61 @@ const docTemplate = `{
                 }
             }
         },
+        "/send/poll": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Send Poll to Spesific WhatsApp Personal ID or Group ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Send Message"
+                ],
+                "summary": "Send Poll",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Poll Question",
+                        "name": "question",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Poll Options (Comma Seperated for New Options)",
+                        "name": "options",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Is Multiple Answer",
+                        "name": "multianswer",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/send/sticker": {
             "post": {
                 "security": [

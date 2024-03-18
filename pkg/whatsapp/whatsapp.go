@@ -1070,7 +1070,7 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question string, options []string, isMultipleAnswer bool) (string, error) {
+func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question string, options []string, isMultiAnswer bool) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -1096,7 +1096,7 @@ func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question str
 
 		// Check if Poll Allow Multiple Answer
 		pollAnswerMax := 1
-		if isMultipleAnswer {
+		if isMultiAnswer {
 			pollAnswerMax = len(options)
 		}
 
@@ -1106,7 +1106,7 @@ func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question str
 		}
 
 		// Send WhatsApp Message Proto
-		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, WhatsAppClient[jid].BuildPollCreation(question, options, pollAnswerMax))
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, WhatsAppClient[jid].BuildPollCreation(question, options, pollAnswerMax), msgExtra)
 		if err != nil {
 			return "", err
 		}

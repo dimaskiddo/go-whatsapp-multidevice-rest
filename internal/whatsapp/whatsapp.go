@@ -597,6 +597,68 @@ func sendMedia(c echo.Context, mediaType string) error {
 	return router.ResponseSuccessWithData(c, "Successfully Send Media Message", resSendMessage)
 }
 
+// SendPoll
+// @Summary     Send Poll
+// @Description Send Poll to Spesific WhatsApp Personal ID or Group ID
+// @Tags        WhatsApp Send Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn       formData  string  true  "Destination WhatsApp Personal ID or Group ID"
+// @Param       question     formData  string  true  "Poll Question"
+// @Param       options      formData  string  true  "Poll Options (Comma Seperated for New Options)"
+// @Param       multianswer  formData  bool    false "Is Multiple Answer"             default(false)
+// @Success     200
+// @Security    BearerAuth
+// @Router      /send/poll [post]
+func SendPoll(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqSendPoll typWhatsApp.RequestSendPoll
+	reqSendPoll.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqSendPoll.Question = strings.TrimSpace(c.FormValue("question"))
+	reqSendPoll.Options = strings.TrimSpace(c.FormValue("options"))
+
+	if len(reqSendPoll.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqSendPoll.Question) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Question")
+	}
+
+	if len(reqSendPoll.Options) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Options")
+	}
+
+	isMultiAnswer := strings.TrimSpace(c.FormValue("multianswer"))
+	if len(isMultiAnswer) == 0 {
+		// If MultiAnswer Parameter Doesn't Exist or Empty String
+		// Then Set it Default to False
+		reqSendPoll.MultiAnswer = false
+	} else {
+		// If MultiAnswer Parameter is not Empty
+		// Then Parse it to Bool
+		reqSendPoll.MultiAnswer, err = strconv.ParseBool(isMultiAnswer)
+		if err != nil {
+			return router.ResponseBadRequest(c, err.Error())
+		}
+	}
+
+	pollOptions := strings.Split(reqSendPoll.Options, ",")
+	for i, str := range pollOptions {
+		pollOptions[i] = strings.TrimSpace(str)
+	}
+
+	var resSendMessage typWhatsApp.ResponseSendMessage
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppSendPoll(c.Request().Context(), jid, reqSendPoll.RJID, reqSendPoll.Question, pollOptions, reqSendPoll.MultiAnswer)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully Send Poll Message", resSendMessage)
+}
+
 // MessageEdit
 // @Summary     Update Message
 // @Description Update Message to Spesific WhatsApp Personal ID or Group ID
