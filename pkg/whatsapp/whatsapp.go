@@ -346,6 +346,25 @@ func WhatsAppGetJID(jid string, id string) types.JID {
 	return types.EmptyJID
 }
 
+func WhatsAppCheckJID(jid string, id string) (types.JID, error) {
+	if WhatsAppClient[jid] != nil {
+		// Compose New Remote JID
+		remoteJID := WhatsAppComposeJID(id)
+		if remoteJID.Server != types.GroupServer {
+			// Validate JID if Remote JID is not Group JID
+			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
+				return types.EmptyJID, errors.New("WhatsApp Personal ID is Not Registered")
+			}
+		}
+
+		// Return Remote ID Information
+		return remoteJID, nil
+	}
+
+	// Return Empty ID Information
+	return types.EmptyJID, nil
+}
+
 func WhatsAppComposeJID(id string) types.JID {
 	// Decompose WhatsApp ID First Before Recomposing
 	id = WhatsAppDecomposeJID(id)
@@ -408,6 +427,32 @@ func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio
 	_ = WhatsAppClient[jid].SendChatPresence(rjid, typeCompose, typeComposeMedia)
 }
 
+func WhatsAppCheckRegistered(jid string, id string) error {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, id)
+		if err != nil {
+			return err
+		}
+
+		// Make Sure WhatsApp ID is Not Empty or It is Not Group ID
+		if remoteJID.IsEmpty() || remoteJID.Server == types.GroupServer {
+			return errors.New("WhatsApp Personal ID is Not Registered")
+		}
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
+}
+
 func WhatsAppSendText(ctx context.Context, jid string, rjid string, message string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
@@ -418,13 +463,10 @@ func WhatsAppSendText(ctx context.Context, jid string, rjid string, message stri
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -466,13 +508,10 @@ func WhatsAppSendLocation(ctx context.Context, jid string, rjid string, latitude
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -517,13 +556,10 @@ func WhatsAppSendDocument(ctx context.Context, jid string, rjid string, fileByte
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -581,13 +617,10 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -722,13 +755,10 @@ func WhatsAppSendAudio(ctx context.Context, jid string, rjid string, audioBytes 
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -780,13 +810,10 @@ func WhatsAppSendVideo(ctx context.Context, jid string, rjid string, videoBytes 
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -844,13 +871,10 @@ func WhatsAppSendContact(ctx context.Context, jid string, rjid string, contactNa
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -898,13 +922,10 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -983,13 +1004,10 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -1050,7 +1068,7 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppMessageUpdate(ctx context.Context, jid string, rjid string, msgid string, message string) (string, error) {
+func WhatsAppMessageEdit(ctx context.Context, jid string, rjid string, msgid string, message string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -1060,13 +1078,10 @@ func WhatsAppMessageUpdate(ctx context.Context, jid string, rjid string, msgid s
 			return "", err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return "", errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
 		}
 
 		// Set Chat Presence
@@ -1105,13 +1120,10 @@ func WhatsAppMessageDelete(ctx context.Context, jid string, rjid string, msgid s
 			return err
 		}
 
-		// Compose New Remote JID
-		remoteJID := WhatsAppComposeJID(rjid)
-		if remoteJID.Server != types.GroupServer {
-			// Validate JID if Remote JID is not Gorup JID
-			if WhatsAppGetJID(jid, remoteJID.String()).IsEmpty() {
-				return errors.New("WhatsApp Personal ID is Not Registered")
-			}
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return err
 		}
 
 		// Set Chat Presence
@@ -1189,7 +1201,7 @@ func WhatsAppGroupJoin(jid string, link string) (string, error) {
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
-func WhatsAppGroupLeave(jid string, gid string) error {
+func WhatsAppGroupLeave(jid string, gjid string) error {
 	if WhatsAppClient[jid] != nil {
 		var err error
 
@@ -1199,8 +1211,19 @@ func WhatsAppGroupLeave(jid string, gid string) error {
 			return err
 		}
 
+		// Make Sure WhatsApp ID is Registered
+		groupJID, err := WhatsAppCheckJID(jid, gjid)
+		if err != nil {
+			return err
+		}
+
+		// Make Sure WhatsApp ID is Group Server
+		if groupJID.Server != types.GroupServer {
+			return errors.New("WhatsApp Group ID is Not Group Server")
+		}
+
 		// Leave Group By Group ID
-		return WhatsAppClient[jid].LeaveGroup(WhatsAppComposeJID(gid))
+		return WhatsAppClient[jid].LeaveGroup(groupJID)
 	}
 
 	// Return Error WhatsApp Client is not Valid

@@ -48,8 +48,8 @@ func Routes(e *echo.Echo) {
 	e.GET(router.BaseURL+"/registered", ctlWhatsApp.Registered, middleware.JWTWithConfig(authJWTConfig))
 
 	e.GET(router.BaseURL+"/group", ctlWhatsApp.GetGroup, middleware.JWTWithConfig(authJWTConfig))
-	e.POST(router.BaseURL+"/group", ctlWhatsApp.JoinGroup, middleware.JWTWithConfig(authJWTConfig))
-	e.DELETE(router.BaseURL+"/group", ctlWhatsApp.LeaveGroup, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/group/join", ctlWhatsApp.JoinGroup, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/group/leave", ctlWhatsApp.LeaveGroup, middleware.JWTWithConfig(authJWTConfig))
 
 	e.POST(router.BaseURL+"/send/text", ctlWhatsApp.SendText, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/send/location", ctlWhatsApp.SendLocation, middleware.JWTWithConfig(authJWTConfig))
@@ -61,6 +61,6 @@ func Routes(e *echo.Echo) {
 	e.POST(router.BaseURL+"/send/video", ctlWhatsApp.SendVideo, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/send/sticker", ctlWhatsApp.SendSticker, middleware.JWTWithConfig(authJWTConfig))
 
-	e.POST(router.BaseURL+"/message", ctlWhatsApp.MessageUpdate, middleware.JWTWithConfig(authJWTConfig))
-	e.DELETE(router.BaseURL+"/message", ctlWhatsApp.MessageDelete, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/message/edit", ctlWhatsApp.MessageEdit, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/message/delete", ctlWhatsApp.MessageDelete, middleware.JWTWithConfig(authJWTConfig))
 }

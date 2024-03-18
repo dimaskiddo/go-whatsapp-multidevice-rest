@@ -173,9 +173,9 @@ func Registered(c echo.Context) error {
 		return router.ResponseInternalError(c, "Missing Query Value MSISDN")
 	}
 
-	jidInfo := pkgWhatsApp.WhatsAppGetJID(jid, remoteJID)
-	if jidInfo.IsEmpty() {
-		return router.ResponseNotFound(c, "WhatsApp Personal ID is Not Registered")
+	err := pkgWhatsApp.WhatsAppCheckRegistered(jid, remoteJID)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
 	}
 
 	return router.ResponseSuccess(c, "WhatsApp Personal ID is Registered")
@@ -209,7 +209,7 @@ func GetGroup(c echo.Context) error {
 // @Param       link    formData  string  true  "Group Invitation Link"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /group [post]
+// @Router      /group/join [post]
 func JoinGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -234,19 +234,19 @@ func JoinGroup(c echo.Context) error {
 // @Description Leaving Group By Group ID from WhatsApp
 // @Tags        WhatsApp Group
 // @Produce     json
-// @Param       gid    formData  string  true  "Group ID"
+// @Param       groupid    formData  string  true  "Group ID"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /group [delete]
+// @Router      /group/leave [post]
 func LeaveGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
 	var reqGroupLeave typWhatsApp.RequestGroupLeave
-	reqGroupLeave.GID = strings.TrimSpace(c.FormValue("gid"))
+	reqGroupLeave.GID = strings.TrimSpace(c.FormValue("groupid"))
 
 	if len(reqGroupLeave.GID) == 0 {
-		return router.ResponseBadRequest(c, "Missing Form Value GID")
+		return router.ResponseBadRequest(c, "Missing Form Value Group ID")
 	}
 
 	err = pkgWhatsApp.WhatsAppGroupLeave(jid, reqGroupLeave.GID)
@@ -597,7 +597,7 @@ func sendMedia(c echo.Context, mediaType string) error {
 	return router.ResponseSuccessWithData(c, "Successfully Send Media Message", resSendMessage)
 }
 
-// MessageUpdate
+// MessageEdit
 // @Summary     Update Message
 // @Description Update Message to Spesific WhatsApp Personal ID or Group ID
 // @Tags        WhatsApp Message
@@ -608,8 +608,8 @@ func sendMedia(c echo.Context, mediaType string) error {
 // @Param       message   formData  string  true  "Text Message"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /message [post]
-func MessageUpdate(c echo.Context) error {
+// @Router      /message/edit [post]
+func MessageEdit(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
@@ -623,7 +623,7 @@ func MessageUpdate(c echo.Context) error {
 	}
 
 	if len(reqMessageUpdate.MSGID) == 0 {
-		return router.ResponseBadRequest(c, "Missing Form Value MessageID")
+		return router.ResponseBadRequest(c, "Missing Form Value Message ID")
 	}
 
 	if len(reqMessageUpdate.Message) == 0 {
@@ -631,7 +631,7 @@ func MessageUpdate(c echo.Context) error {
 	}
 
 	var resSendMessage typWhatsApp.ResponseSendMessage
-	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppMessageUpdate(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID, reqMessageUpdate.Message)
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppMessageEdit(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID, reqMessageUpdate.Message)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -649,7 +649,7 @@ func MessageUpdate(c echo.Context) error {
 // @Param       messageid formData  string  true  "Message ID"
 // @Success     200
 // @Security    BearerAuth
-// @Router      /message [delete]
+// @Router      /message/delete [post]
 func MessageDelete(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
@@ -663,7 +663,7 @@ func MessageDelete(c echo.Context) error {
 	}
 
 	if len(reqMessageUpdate.MSGID) == 0 {
-		return router.ResponseBadRequest(c, "Missing Form Value MessageID")
+		return router.ResponseBadRequest(c, "Missing Form Value Message ID")
 	}
 
 	err = pkgWhatsApp.WhatsAppMessageDelete(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID)
