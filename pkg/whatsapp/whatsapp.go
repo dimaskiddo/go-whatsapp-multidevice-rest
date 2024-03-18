@@ -1070,6 +1070,54 @@ func WhatsAppSendSticker(ctx context.Context, jid string, rjid string, stickerBy
 	return "", errors.New("WhatsApp Client is not Valid")
 }
 
+func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question string, options []string, isMultipleAnswer bool) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
+		}
+
+		// Set Chat Presence
+		WhatsAppPresence(jid, true)
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
+
+		// Check if Poll Allow Multiple Answer
+		pollAnswerMax := 1
+		if isMultipleAnswer {
+			pollAnswerMax = len(options)
+		}
+
+		// Compose WhatsApp Proto
+		msgExtra := whatsmeow.SendRequestExtra{
+			ID: WhatsAppClient[jid].GenerateMessageID(),
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, WhatsAppClient[jid].BuildPollCreation(question, options, pollAnswerMax))
+		if err != nil {
+			return "", err
+		}
+
+		return msgExtra.ID, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+}
+
 func WhatsAppMessageEdit(ctx context.Context, jid string, rjid string, msgid string, message string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
