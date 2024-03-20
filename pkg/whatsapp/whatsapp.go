@@ -1094,6 +1094,11 @@ func WhatsAppSendPoll(ctx context.Context, jid string, rjid string, question str
 			WhatsAppPresence(jid, false)
 		}()
 
+		// Check Options Must Be Equal or Greater Than 2
+		if len(options) < 2 {
+			return "", errors.New("WhatsApp Poll Options / Choices Must Be Equal or Greater Than 2")
+		}
+
 		// Check if Poll Allow Multiple Answer
 		pollAnswerMax := 1
 		if isMultiAnswer {
