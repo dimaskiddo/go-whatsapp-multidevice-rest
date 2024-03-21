@@ -1193,7 +1193,7 @@ func WhatsAppMessageReact(ctx context.Context, jid string, rjid string, msgid st
 		}()
 
 		// Check Emoji Must Be Contain Only 1 Emoji Character
-		if !gomoji.ContainsEmoji(emoji) && uniseg.GraphemeClusterCount(emoji) == 1 {
+		if !gomoji.ContainsEmoji(emoji) && uniseg.GraphemeClusterCount(emoji) != 1 {
 			return "", errors.New("WhatsApp Message React Emoji Must Be Contain Only 1 Emoji Character")
 		}
 
