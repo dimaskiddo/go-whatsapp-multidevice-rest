@@ -192,6 +192,37 @@ paths:
       summary: Update Message
       tags:
       - WhatsApp Message
+  /message/react:
+    post:
+      consumes:
+      - multipart/form-data
+      description: React Message to Spesific WhatsApp Personal ID or Group ID
+      parameters:
+      - description: Destination WhatsApp Personal ID or Group ID
+        in: formData
+        name: msisdn
+        required: true
+        type: string
+      - description: Message ID
+        in: formData
+        name: messageid
+        required: true
+        type: string
+      - description: Reaction Emoji
+        in: formData
+        name: emoji
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      security:
+      - BearerAuth: []
+      summary: React Message
+      tags:
+      - WhatsApp Message
   /registered:
     get:
       description: Check WhatsApp Personal ID is Registered

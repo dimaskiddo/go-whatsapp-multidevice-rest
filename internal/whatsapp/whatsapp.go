@@ -701,6 +701,48 @@ func MessageEdit(c echo.Context) error {
 	return router.ResponseSuccessWithData(c, "Successfully Update Message", resSendMessage)
 }
 
+// MessageReact
+// @Summary     React Message
+// @Description React Message to Spesific WhatsApp Personal ID or Group ID
+// @Tags        WhatsApp Message
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       msisdn    formData  string  true  "Destination WhatsApp Personal ID or Group ID"
+// @Param       messageid formData  string  true  "Message ID"
+// @Param       emoji     formData  string  true  "Reaction Emoji"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /message/react [post]
+func MessageReact(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	var reqMessageUpdate typWhatsApp.RequestMessage
+	reqMessageUpdate.RJID = strings.TrimSpace(c.FormValue("msisdn"))
+	reqMessageUpdate.MSGID = strings.TrimSpace(c.FormValue("messageid"))
+	reqMessageUpdate.Emoji = strings.TrimSpace(c.FormValue("emoji"))
+
+	if len(reqMessageUpdate.RJID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value MSISDN")
+	}
+
+	if len(reqMessageUpdate.MSGID) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Message ID")
+	}
+
+	if len(reqMessageUpdate.Emoji) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value Emoji")
+	}
+
+	var resSendMessage typWhatsApp.ResponseSendMessage
+	resSendMessage.MsgID, err = pkgWhatsApp.WhatsAppMessageReact(c.Request().Context(), jid, reqMessageUpdate.RJID, reqMessageUpdate.MSGID, reqMessageUpdate.Emoji)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccessWithData(c, "Successfully React Message", resSendMessage)
+}
+
 // MessageDelete
 // @Summary     Delete Message
 // @Description Delete Message to Spesific WhatsApp Personal ID or Group ID

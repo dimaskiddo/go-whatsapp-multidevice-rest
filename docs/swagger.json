@@ -309,6 +309,54 @@
                 }
             }
         },
+        "/message/react": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "React Message to Spesific WhatsApp Personal ID or Group ID",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Message"
+                ],
+                "summary": "React Message",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Destination WhatsApp Personal ID or Group ID",
+                        "name": "msisdn",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Message ID",
+                        "name": "messageid",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Reaction Emoji",
+                        "name": "emoji",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/registered": {
             "get": {
                 "security": [

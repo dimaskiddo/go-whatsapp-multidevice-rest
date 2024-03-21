@@ -39,6 +39,7 @@ type RequestMessage struct {
 	RJID    string
 	MSGID   string
 	Message string
+	Emoji   string
 }
 
 type RequestGroupJoin struct {

@@ -5,12 +5,14 @@ go 1.21
 require (
 	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/SporkHubr/echo-http-cache v0.0.0-20200706100054-1d7ae9f38029
+	github.com/forPelevin/gomoji v1.1.8
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/lib/pq v1.10.9
 	github.com/nickalie/go-webpbin v0.0.0-20220110095747-f10016bf2dc1
+	github.com/rivo/uniseg v0.4.4
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
@@ -60,7 +62,6 @@ require (
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
-	github.com/rivo/uniseg v0.4.4 // indirect
 	github.com/rs/zerolog v1.32.0 // indirect
 	github.com/sunshineplan/pdf v1.0.7 // indirect
 	github.com/swaggo/files/v2 v2.0.0 // indirect

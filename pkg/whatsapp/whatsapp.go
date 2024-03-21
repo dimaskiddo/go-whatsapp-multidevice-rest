@@ -9,9 +9,12 @@ import (
 	"net/http"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
+	"github.com/forPelevin/gomoji"
 	webp "github.com/nickalie/go-webpbin"
+	"github.com/rivo/uniseg"
 	"github.com/sunshineplan/imgconv"
 
 	qrCode "github.com/skip2/go-qrcode"
@@ -1163,6 +1166,62 @@ func WhatsAppMessageEdit(ctx context.Context, jid string, rjid string, msgid str
 
 	// Return Error WhatsApp Client is not Valid
 	return "", errors.New("WhatsApp Client is not Valid")
+}
+
+func WhatsAppMessageReact(ctx context.Context, jid string, rjid string, msgid string, emoji string) (string, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return "", err
+		}
+
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return "", err
+		}
+
+		// Set Chat Presence
+		WhatsAppPresence(jid, true)
+		WhatsAppComposeStatus(jid, remoteJID, true, false)
+		defer func() {
+			WhatsAppComposeStatus(jid, remoteJID, false, false)
+			WhatsAppPresence(jid, false)
+		}()
+
+		// Check Emoji Must Be Contain Only 1 Emoji Character
+		if !gomoji.ContainsEmoji(emoji) && uniseg.GraphemeClusterCount(emoji) == 1 {
+			return "", errors.New("WhatsApp Message React Emoji Must Be Contain Only 1 Emoji Character")
+		}
+
+		// Compose WhatsApp Proto
+		msgReact := &waproto.Message{
+			ReactionMessage: &waproto.ReactionMessage{
+				Key: &waproto.MessageKey{
+					FromMe:    proto.Bool(true),
+					Id:        proto.String(msgid),
+					RemoteJid: proto.String(remoteJID.String()),
+				},
+				Text:              proto.String(emoji),
+				SenderTimestampMs: proto.Int64(time.Now().UnixMilli()),
+			},
+		}
+
+		// Send WhatsApp Message Proto
+		_, err = WhatsAppClient[jid].SendMessage(ctx, remoteJID, msgReact)
+		if err != nil {
+			return "", err
+		}
+
+		return msgid, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return "", errors.New("WhatsApp Client is not Valid")
+
 }
 
 func WhatsAppMessageDelete(ctx context.Context, jid string, rjid string, msgid string) error {
