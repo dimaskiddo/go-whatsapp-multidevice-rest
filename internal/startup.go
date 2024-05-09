@@ -1,6 +1,7 @@
 package internal
 
 import (
+	_ "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/app"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 	pkgWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/whatsapp"
 )
