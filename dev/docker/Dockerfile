@@ -27,7 +27,6 @@ RUN mkdir -p {.bin/webp,dbs} \
 COPY --from=go-builder /usr/src/app/.env.example ./.env
 COPY --from=go-builder /usr/src/app/main ./main
 
-EXPOSE 3000
-
 VOLUME ["/usr/app/${SERVICE_NAME}/dbs"]
 CMD ["main"]
+    

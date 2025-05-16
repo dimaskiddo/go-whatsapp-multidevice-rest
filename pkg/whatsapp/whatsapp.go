@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -28,7 +29,10 @@ import (
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
+	"go.mau.fi/whatsmeow/types/events"
 
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/app"
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/app/database"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
@@ -106,6 +110,11 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 
 		// Set WhatsApp Client Auto Trust Identity
 		WhatsAppClient[jid].AutoTrustIdentity = true
+
+		// Set WhatsApp Client Event Handler
+		WhatsAppClient[jid].AddEventHandler(func(evt interface{}) {
+			whatsAppEventHandler(evt)
+		})
 	}
 }
 
@@ -1341,4 +1350,23 @@ func WhatsAppGroupLeave(jid string, gjid string) error {
 
 	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
+}
+
+func whatsAppEventHandler(evt interface{}) {
+	switch v := evt.(type) {
+	case *events.Message:
+		res, err := app.AppRequest.Post(app.AppWebhookURL, v)
+		respBody := database.AppWebhookResponse{
+			CallbackUrl: app.AppWebhookURL,
+			Status:      res.Status,
+			Response:    json.RawMessage(res.Body),
+		}
+		if err != nil {
+			respBody.ErrorMessage = err.Error()
+		}
+		err = app.AppDatabase.StoreResponse(&respBody)
+		if err != nil {
+			fmt.Println("Error storing webhook response:", err)
+		}
+	}
 }
