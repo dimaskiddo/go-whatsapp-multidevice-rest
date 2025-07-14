@@ -212,6 +212,26 @@ func SetWebhook(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Set Webhook URL")
 }
 
+// Delete Webhook
+// @Summary     Delete Webhook for WhatsApp Multi-Device
+// @Description Delete Webhook for WhatsApp Multi-Device
+// @Tags        WhatsApp Webhook
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /webhook [delete]
+func DeleteWebhook(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	err = pkgWhatsApp.WhatsAppDeleteWebhook(jid)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Deleted Webhook URL")
+}
+
 // GetGroup
 // @Summary     Get Joined Groups Information
 // @Description Get Joined Groups Information from WhatsApp

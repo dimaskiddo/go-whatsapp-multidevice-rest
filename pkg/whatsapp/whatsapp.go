@@ -3,6 +3,7 @@ package whatsapp
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -40,12 +41,10 @@ import (
 var (
 	WhatsAppDatastore *sqlstore.Container
 	WhatsAppClient    = make(map[string]*whatsmeow.Client)
+	repository        WhatsAppRepository
 )
 
-var (
-	WhatsAppClientProxyURL string
-	WhatsAppClientWebhooks = make(map[string]string)
-)
+var WhatsAppClientProxyURL string
 
 type WebhookPayload struct {
 	JID       string                 `json:"jid"`
@@ -70,6 +69,18 @@ func init() {
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore URI")
 	}
+
+	db, err := sql.Open(dbType, dbURI)
+	if err != nil {
+		log.Print(nil).Fatalf("Error Open WhatsApp Client Datastore: %v", err)
+	}
+
+	err = runDeviceWebhooksMigrations(db)
+	if err != nil {
+		log.Print(nil).Fatalf("Error Running Device Webhooks Migrations: %v", err)
+	}
+
+	repository = NewWhatsappRepository(db)
 
 	datastore, err := sqlstore.New(dbType, dbURI, nil)
 	if err != nil {
@@ -115,7 +126,7 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 
 		WhatsAppClient[jid].AddEventHandler(func(evt interface{}) {
-			handleWhatsAppEvent(jid, evt)
+			handleWhatsAppMessageEvent(jid, evt)
 		})
 
 		// Set WhatsApp Client Proxy Address if Proxy URL is Provided
@@ -132,26 +143,46 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 }
 
 func WhatsAppSetWebhook(jid string, webHookURL string) error {
-	if webHookURL != "" {
-		_, err := netUrl.ParseRequestURI(webHookURL)
-		if err != nil {
-			return fmt.Errorf("invalid webhook URL: %w", err)
-		}
+	if webHookURL == "" {
+		log.Print(nil).Error("Webhook URL cannot be empty")
+		return errors.New("webhook URL cannot be empty")
 	}
 
-	WhatsAppClientWebhooks[jid] = webHookURL
-	if webHookURL != "" {
-		log.Print(nil).Infof("Webhook for JID %s set to: %s", jid, webHookURL)
-	} else {
-		log.Print(nil).Infof("Webhook for JID %s cleared", jid)
+	_, err := netUrl.ParseRequestURI(webHookURL)
+	if err != nil {
+		log.Print(nil).Errorf("Invalid webhook URL: %v", err)
+		return fmt.Errorf("invalid webhook URL: %w", err)
 	}
+
+	err = repository.SetWebhook(jid, webHookURL)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to set webhook for JID %s: %v", jid, err)
+		return fmt.Errorf("failed to set webhook for JID %s: %w", jid, err)
+	}
+
+	log.Print(nil).Infof("Webhook for JID %s set to %s", jid, webHookURL)
 
 	return nil
 }
 
-func handleWhatsAppEvent(jid string, rawEvt interface{}) {
-	webhookURL, exists := WhatsAppClientWebhooks[jid]
-	if !exists || webhookURL == "" {
+func WhatsAppDeleteWebhook(jid string) error {
+	err := repository.DeleteWebhook(jid)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to delete webhook for JID %s: %v", jid, err)
+		return fmt.Errorf("failed to delete webhook for JID %s: %w", jid, err)
+	}
+	log.Print(nil).Infof("Webhook for JID %s deleted", jid)
+	return nil
+}
+
+func handleWhatsAppMessageEvent(jid string, rawEvt interface{}) {
+	webhookURL, err := repository.GetWebhook(jid)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to get webhook URL for JID %s: %v", jid, err)
+		return
+	}
+
+	if webhookURL == "" {
 		return
 	}
 
