@@ -14,6 +14,7 @@ import (
 	pkgWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/whatsapp"
 
 	typAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth/types"
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/util"
 	typWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/whatsapp/types"
 )
 
@@ -179,6 +180,56 @@ func Registered(c echo.Context) error {
 	}
 
 	return router.ResponseSuccess(c, "WhatsApp Personal ID is Registered")
+}
+
+// Webhook
+// @Summary     Set Webhook for WhatsApp Multi-Device
+// @Description Set Webhook for WhatsApp Multi-Device
+// @Tags        WhatsApp Webhook
+// @Accept      multipart/form-data
+// @Produce     json
+// @Param       url    formData  string  true  "Webhook URL"
+// @Success     200
+// @Security    BearerAuth
+// @Router      /webhook [post]
+func SetWebhook(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	webhookURL := strings.TrimSpace(c.FormValue("url"))
+	if len(webhookURL) == 0 {
+		return router.ResponseBadRequest(c, "Missing Form Value URL")
+	}
+	if !util.IsValidURL(webhookURL) {
+		return router.ResponseBadRequest(c, "Invalid Webhook URL")
+	}
+
+	err = pkgWhatsApp.WhatsAppSetWebhook(jid, webhookURL)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Set Webhook URL")
+}
+
+// Webhook
+// @Summary     Delete Webhook for WhatsApp Multi-Device
+// @Description Delete Webhook for WhatsApp Multi-Device
+// @Tags        WhatsApp Webhook
+// @Produce     json
+// @Success     200
+// @Security    BearerAuth
+// @Router      /webhook [delete]
+func DeleteWebhook(c echo.Context) error {
+	var err error
+	jid := jwtPayload(c).JID
+
+	err = pkgWhatsApp.WhatsAppDeleteWebhook(jid)
+	if err != nil {
+		return router.ResponseInternalError(c, err.Error())
+	}
+
+	return router.ResponseSuccess(c, "Successfully Deleted Webhook URL")
 }
 
 // GetGroup

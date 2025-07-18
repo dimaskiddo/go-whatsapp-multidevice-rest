@@ -47,6 +47,9 @@ func Routes(e *echo.Echo) {
 
 	e.GET(router.BaseURL+"/registered", ctlWhatsApp.Registered, middleware.JWTWithConfig(authJWTConfig))
 
+	e.POST(router.BaseURL+"/webhook", ctlWhatsApp.SetWebhook, middleware.JWTWithConfig(authJWTConfig))
+	e.DELETE(router.BaseURL+"/webhook", ctlWhatsApp.DeleteWebhook, middleware.JWTWithConfig(authJWTConfig))
+
 	e.GET(router.BaseURL+"/group", ctlWhatsApp.GetGroup, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/group/join", ctlWhatsApp.JoinGroup, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/group/leave", ctlWhatsApp.LeaveGroup, middleware.JWTWithConfig(authJWTConfig))

@@ -3,10 +3,14 @@ package whatsapp
 import (
 	"bytes"
 	"context"
+	"database/sql"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	netUrl "net/url"
 	"runtime"
 	"strings"
 	"time"
@@ -28,17 +32,30 @@ import (
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
+	"go.mau.fi/whatsmeow/types/events"
 
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
 
-var WhatsAppDatastore *sqlstore.Container
-var WhatsAppClient = make(map[string]*whatsmeow.Client)
-
 var (
-	WhatsAppClientProxyURL string
+	WhatsAppDatastore *sqlstore.Container
+	WhatsAppClient    = make(map[string]*whatsmeow.Client)
+	repository        WhatsAppRepository
 )
+
+var WhatsAppClientProxyURL string
+
+type WebhookPayload struct {
+	JID       string                 `json:"jid"`
+	Event     string                 `json:"event"`
+	Timestamp time.Time              `json:"timestamp"`
+	MessageID string                 `json:"messageId"`
+	IsFromMe  bool                   `json:"isFromMe"`
+	IsGroup   bool                   `json:"isGroup"`
+	Sender    string                 `json:"sender"`
+	Content   map[string]interface{} `json:"content"`
+}
 
 func init() {
 	var err error
@@ -52,6 +69,18 @@ func init() {
 	if err != nil {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore URI")
 	}
+
+	db, err := sql.Open(dbType, dbURI)
+	if err != nil {
+		log.Print(nil).Fatalf("Error Open WhatsApp Client Datastore: %v", err)
+	}
+
+	err = runDeviceWebhooksMigrations(db)
+	if err != nil {
+		log.Print(nil).Fatalf("Error Running Device Webhooks Migrations: %v", err)
+	}
+
+	repository = NewWhatsappRepository(db)
 
 	datastore, err := sqlstore.New(dbType, dbURI, nil)
 	if err != nil {
@@ -96,6 +125,10 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		// And Save it to The Map
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 
+		WhatsAppClient[jid].AddEventHandler(func(evt interface{}) {
+			handleWhatsAppEvent(jid, evt)
+		})
+
 		// Set WhatsApp Client Proxy Address if Proxy URL is Provided
 		if len(WhatsAppClientProxyURL) > 0 {
 			WhatsAppClient[jid].SetProxyAddress(WhatsAppClientProxyURL)
@@ -106,6 +139,155 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 
 		// Set WhatsApp Client Auto Trust Identity
 		WhatsAppClient[jid].AutoTrustIdentity = true
+	}
+}
+
+func WhatsAppSetWebhook(jid string, webHookURL string) error {
+	if webHookURL == "" {
+		log.Print(nil).Error("Webhook URL cannot be empty")
+		return errors.New("webhook URL cannot be empty")
+	}
+
+	_, err := netUrl.ParseRequestURI(webHookURL)
+	if err != nil {
+		log.Print(nil).Errorf("Invalid webhook URL: %v", err)
+		return fmt.Errorf("invalid webhook URL: %w", err)
+	}
+
+	err = repository.SetWebhook(WhatsAppClient[jid].Store.ID.String(), webHookURL)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to set webhook for JID %s: %v", jid, err)
+		return fmt.Errorf("failed to set webhook for JID %s: %w", jid, err)
+	}
+
+	log.Print(nil).Infof("Webhook for JID %s set to %s", jid, webHookURL)
+
+	return nil
+}
+
+func WhatsAppDeleteWebhook(jid string) error {
+	err := repository.DeleteWebhook(WhatsAppClient[jid].Store.ID.String())
+	if err != nil {
+		log.Print(nil).Errorf("Failed to delete webhook for JID %s: %v", jid, err)
+		return fmt.Errorf("failed to delete webhook for JID %s: %w", jid, err)
+	}
+	log.Print(nil).Infof("Webhook for JID %s deleted", jid)
+	return nil
+}
+
+func handleWhatsAppEvent(jid string, rawEvt interface{}) {
+	webhookURL, err := repository.GetWebhook(WhatsAppClient[jid].Store.ID.String())
+	if err != nil {
+		log.Print(nil).Errorf("Failed to get webhook URL for JID %s: %v", jid, err)
+		return
+	}
+
+	if webhookURL == "" {
+		return
+	}
+
+	switch evt := rawEvt.(type) {
+	case *events.Message:
+		if evt.Message == nil {
+			return
+		}
+		if evt.Info.IsFromMe {
+			return
+		}
+
+		senderJID := evt.Info.Sender.String()
+
+		content := make(map[string]interface{})
+		if conv := evt.Message.GetConversation(); conv != "" {
+			content["type"] = "text"
+			content["text"] = conv
+		} else if ext := evt.Message.GetExtendedTextMessage(); ext != nil {
+			content["type"] = "extended_text"
+			content["text"] = ext.GetText()
+		} else if img := evt.Message.GetImageMessage(); img != nil {
+			content["type"] = "image"
+			content["caption"] = img.GetCaption()
+		} else if aud := evt.Message.GetAudioMessage(); aud != nil {
+			content["type"] = "audio"
+		} else if vid := evt.Message.GetVideoMessage(); vid != nil {
+			content["type"] = "video"
+			content["caption"] = vid.GetCaption()
+		} else if doc := evt.Message.GetDocumentMessage(); doc != nil {
+			content["type"] = "document"
+			content["filename"] = doc.GetFileName()
+		} else if sticker := evt.Message.GetStickerMessage(); sticker != nil {
+			content["type"] = "sticker"
+		} else if loc := evt.Message.GetLocationMessage(); loc != nil {
+			content["type"] = "location"
+			content["latitude"] = loc.GetDegreesLatitude()
+			content["longitude"] = loc.GetDegreesLongitude()
+		} else if cont := evt.Message.GetContactMessage(); cont != nil {
+			content["type"] = "contact"
+			content["name"] = cont.GetDisplayName()
+			content["vcard"] = cont.GetVcard()
+		} else if poll := evt.Message.GetPollCreationMessage(); poll != nil {
+			content["type"] = "poll"
+			content["question"] = poll.GetName()
+			options := make([]string, len(poll.GetOptions()))
+			for i, option := range poll.GetOptions() {
+				options[i] = option.GetOptionName()
+			}
+			content["options"] = options
+		} else {
+			content["type"] = "unsupported"
+		}
+
+		if val, ok := content["type"]; ok && val == "unsupported" {
+			return
+		}
+
+		payload := WebhookPayload{
+			JID:       jid,
+			Event:     "message",
+			Timestamp: evt.Info.Timestamp,
+			MessageID: evt.Info.ID,
+			IsFromMe:  evt.Info.IsFromMe,
+			IsGroup:   evt.Info.IsGroup,
+			Sender:    senderJID,
+			Content:   content,
+		}
+
+		go sendWebhook(webhookURL, payload)
+	}
+}
+
+func sendWebhook(url string, payload WebhookPayload) {
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to marshal webhook payload: %v", err)
+		return
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		log.Print(nil).Errorf("Failed to create webhook request: %v", err)
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", "Go-WhatsApp-Webhook/1.0")
+
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Print(nil).Errorf("Failed to send webhook request: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		log.Print(nil).Errorf("Webhook request failed with status %d url %s: %s", resp.StatusCode, url, string(bodyBytes))
+		return
+	} else {
+		log.Print(nil).Infof("Webhook request sent successfully to %s", url)
 	}
 }
 
@@ -677,7 +859,6 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 			err = imgconv.Write(imgResizeEncode,
 				imgconv.Resize(imgResizeDecode, &imgconv.ResizeOption{Width: 1024}),
 				&imgconv.FormatOption{})
-
 			if err != nil {
 				return "", errors.New("Error While Encoding Resize Image Stream")
 			}
@@ -697,7 +878,6 @@ func WhatsAppSendImage(ctx context.Context, jid string, rjid string, imageBytes 
 		err = imgconv.Write(imgThumbEncode,
 			imgconv.Resize(imgThumbDecode, &imgconv.ResizeOption{Width: 72}),
 			&imgconv.FormatOption{Format: imgconv.JPEG})
-
 		if err != nil {
 			return "", errors.New("Error While Encoding Thumbnail Image Stream")
 		}
@@ -1220,7 +1400,6 @@ func WhatsAppMessageReact(ctx context.Context, jid string, rjid string, msgid st
 
 	// Return Error WhatsApp Client is not Valid
 	return "", errors.New("WhatsApp Client is not Valid")
-
 }
 
 func WhatsAppMessageDelete(ctx context.Context, jid string, rjid string, msgid string) error {
