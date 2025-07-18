@@ -34,6 +34,7 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/util"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
@@ -154,31 +155,35 @@ func WhatsAppSetWebhook(jid string, webHookURL string) error {
 		return fmt.Errorf("invalid webhook URL: %w", err)
 	}
 
+	maskedJID := util.MaskedJID(jid)
+
 	err = repository.SetWebhook(WhatsAppClient[jid].Store.ID.String(), webHookURL)
 	if err != nil {
-		log.Print(nil).Errorf("Failed to set webhook for JID %s: %v", jid, err)
+		log.Print(nil).Errorf("Failed to set webhook for JID %s: %v", maskedJID, err)
 		return fmt.Errorf("failed to set webhook for JID %s: %w", jid, err)
 	}
 
-	log.Print(nil).Infof("Webhook for JID %s set to %s", jid, webHookURL)
+	log.Print(nil).Infof("Success set Webhook for JID %s", maskedJID)
 
 	return nil
 }
 
 func WhatsAppDeleteWebhook(jid string) error {
+	maskedJID := util.MaskedJID(jid)
 	err := repository.DeleteWebhook(WhatsAppClient[jid].Store.ID.String())
 	if err != nil {
-		log.Print(nil).Errorf("Failed to delete webhook for JID %s: %v", jid, err)
+		log.Print(nil).Errorf("Failed to delete webhook for JID %s: %v", maskedJID, err)
 		return fmt.Errorf("failed to delete webhook for JID %s: %w", jid, err)
 	}
-	log.Print(nil).Infof("Webhook for JID %s deleted", jid)
+	log.Print(nil).Infof("Webhook for JID %s deleted", maskedJID)
 	return nil
 }
 
 func handleWhatsAppEvent(jid string, rawEvt interface{}) {
+	maskedJID := util.MaskedJID(jid)
 	webhookURL, err := repository.GetWebhook(WhatsAppClient[jid].Store.ID.String())
 	if err != nil {
-		log.Print(nil).Errorf("Failed to get webhook URL for JID %s: %v", jid, err)
+		log.Print(nil).Errorf("Failed to get webhook URL for JID %s: %v", maskedJID, err)
 		return
 	}
 
@@ -257,6 +262,7 @@ func handleWhatsAppEvent(jid string, rawEvt interface{}) {
 }
 
 func sendWebhook(url string, payload WebhookPayload) {
+	maskedJID := util.MaskedJID(payload.JID)
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
 		log.Print(nil).Errorf("Failed to marshal webhook payload: %v", err)
@@ -265,7 +271,7 @@ func sendWebhook(url string, payload WebhookPayload) {
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Print(nil).Errorf("Failed to create webhook request: %v", err)
+		log.Print(nil).Errorf("Failed to create webhook request for JID %s", maskedJID)
 		return
 	}
 
@@ -277,17 +283,15 @@ func sendWebhook(url string, payload WebhookPayload) {
 	}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Print(nil).Errorf("Failed to send webhook request: %v", err)
+		log.Print(nil).Errorf("Failed to send webhook request for JID %s", maskedJID)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
-		log.Print(nil).Errorf("Webhook request failed with status %d url %s: %s", resp.StatusCode, url, string(bodyBytes))
+		log.Print(nil).Errorf("Webhook request failed with status %d for JID %s: %s", resp.StatusCode, maskedJID, string(bodyBytes))
 		return
-	} else {
-		log.Print(nil).Infof("Webhook request sent successfully to %s", url)
 	}
 }
 

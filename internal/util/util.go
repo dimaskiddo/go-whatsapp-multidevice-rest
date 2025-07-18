@@ -14,3 +14,10 @@ func IsValidURL(rawUrl string) bool {
 
 	return true
 }
+
+func MaskedJID(jid string) string {
+	if len(jid) < 4 {
+		return jid
+	}
+	return jid[:len(jid)-4] + "xxxx"
+}
