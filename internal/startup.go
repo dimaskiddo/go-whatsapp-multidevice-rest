@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/util"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 	pkgWhatsApp "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/whatsapp"
 )
@@ -20,10 +21,10 @@ func Startup() {
 		jid := pkgWhatsApp.WhatsAppDecomposeJID(device.ID.User)
 
 		// Mask JID for Logging Information
-		maskJID := jid[0:len(jid)-4] + "xxxx"
+		maskedJID := util.MaskedJID(jid)
 
 		// Print Restore Log
-		log.Print(nil).Info("Restoring WhatsApp Client for " + maskJID)
+		log.Print(nil).Info("Restoring WhatsApp Client for " + maskedJID)
 
 		// Initialize WhatsApp Client
 		pkgWhatsApp.WhatsAppInitClient(device, jid)
