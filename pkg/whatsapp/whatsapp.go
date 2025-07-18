@@ -126,7 +126,7 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		WhatsAppClient[jid] = whatsmeow.NewClient(device, nil)
 
 		WhatsAppClient[jid].AddEventHandler(func(evt interface{}) {
-			handleWhatsAppMessageEvent(jid, evt)
+			handleWhatsAppEvent(jid, evt)
 		})
 
 		// Set WhatsApp Client Proxy Address if Proxy URL is Provided
@@ -154,7 +154,7 @@ func WhatsAppSetWebhook(jid string, webHookURL string) error {
 		return fmt.Errorf("invalid webhook URL: %w", err)
 	}
 
-	err = repository.SetWebhook(jid, webHookURL)
+	err = repository.SetWebhook(WhatsAppClient[jid].Store.ID.String(), webHookURL)
 	if err != nil {
 		log.Print(nil).Errorf("Failed to set webhook for JID %s: %v", jid, err)
 		return fmt.Errorf("failed to set webhook for JID %s: %w", jid, err)
@@ -166,7 +166,7 @@ func WhatsAppSetWebhook(jid string, webHookURL string) error {
 }
 
 func WhatsAppDeleteWebhook(jid string) error {
-	err := repository.DeleteWebhook(jid)
+	err := repository.DeleteWebhook(WhatsAppClient[jid].Store.ID.String())
 	if err != nil {
 		log.Print(nil).Errorf("Failed to delete webhook for JID %s: %v", jid, err)
 		return fmt.Errorf("failed to delete webhook for JID %s: %w", jid, err)
@@ -175,8 +175,8 @@ func WhatsAppDeleteWebhook(jid string) error {
 	return nil
 }
 
-func handleWhatsAppMessageEvent(jid string, rawEvt interface{}) {
-	webhookURL, err := repository.GetWebhook(jid)
+func handleWhatsAppEvent(jid string, rawEvt interface{}) {
+	webhookURL, err := repository.GetWebhook(WhatsAppClient[jid].Store.ID.String())
 	if err != nil {
 		log.Print(nil).Errorf("Failed to get webhook URL for JID %s: %v", jid, err)
 		return

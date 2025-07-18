@@ -212,7 +212,7 @@ func SetWebhook(c echo.Context) error {
 	return router.ResponseSuccess(c, "Successfully Set Webhook URL")
 }
 
-// Delete Webhook
+// Webhook
 // @Summary     Delete Webhook for WhatsApp Multi-Device
 // @Description Delete Webhook for WhatsApp Multi-Device
 // @Tags        WhatsApp Webhook

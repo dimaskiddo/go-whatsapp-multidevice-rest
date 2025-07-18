@@ -551,6 +551,18 @@ paths:
       tags:
       - WhatsApp Send Message
   /webhook:
+    delete:
+      description: Delete Webhook for WhatsApp Multi-Device
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Delete Webhook for WhatsApp Multi-Device
+      tags:
+      - WhatsApp Webhook
     post:
       consumes:
       - multipart/form-data

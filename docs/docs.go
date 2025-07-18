@@ -900,6 +900,26 @@ const docTemplate = `{
                         "description": "OK"
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Delete Webhook for WhatsApp Multi-Device",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "WhatsApp Webhook"
+                ],
+                "summary": "Delete Webhook for WhatsApp Multi-Device",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
             }
         }
     },
