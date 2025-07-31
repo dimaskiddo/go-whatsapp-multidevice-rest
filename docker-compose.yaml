@@ -1,4 +1,4 @@
-version: '2'
+version: '3'
 
 networks:
   whatsapp:
@@ -18,5 +18,5 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./dbs:/usr/app/go-whatsapp-multidevice-rest/dbs
+      - ./dbs:/usr/app/qowam-rest/dbs
     restart: unless-stopped

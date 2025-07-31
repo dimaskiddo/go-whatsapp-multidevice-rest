@@ -53,7 +53,7 @@ func init() {
 		log.Print(nil).Fatal("Error Parse Environment Variable for WhatsApp Client Datastore URI")
 	}
 
-	datastore, err := sqlstore.New(dbType, dbURI, nil)
+	datastore, err := sqlstore.New(context.Background(), dbType, dbURI, nil)
 	if err != nil {
 		log.Print(nil).Fatal("Error Connect WhatsApp Client Datastore")
 	}
@@ -235,7 +235,7 @@ func WhatsAppLoginPair(jid string) (string, int, error) {
 			}
 
 			// Request Pairing Code
-			code, err := WhatsAppClient[jid].PairPhone(jid, true, whatsmeow.PairClientChrome, "Chrome ("+WhatsAppGetUserOS()+")")
+			code, err := WhatsAppClient[jid].PairPhone(context.Background(), jid, true, whatsmeow.PairClientChrome, "Chrome ("+WhatsAppGetUserOS()+")")
 			if err != nil {
 				return "", 0, err
 			}
@@ -289,13 +289,13 @@ func WhatsAppLogout(jid string) error {
 			WhatsAppPresence(jid, false)
 
 			// Logout WhatsApp Client and Disconnect from WebSocket
-			err = WhatsAppClient[jid].Logout()
+			err = WhatsAppClient[jid].Logout(context.Background())
 			if err != nil {
 				// Force Disconnect
 				WhatsAppClient[jid].Disconnect()
 
 				// Manually Delete Device from Datastore Store
-				err = WhatsAppClient[jid].Store.Delete()
+				err = WhatsAppClient[jid].Store.Delete(context.Background())
 				if err != nil {
 					return err
 				}
@@ -972,16 +972,15 @@ func WhatsAppSendLink(ctx context.Context, jid string, rjid string, linkCaption 
 		msgText := linkURL
 
 		if len(strings.TrimSpace(linkCaption)) > 0 {
-			msgText = fmt.Sprintf("%s\n%s", linkCaption, linkURL)
+			msgText = fmt.Sprintf("%s\n🔗 %s", linkCaption, linkURL)
 		}
 
 		msgContent := &waE2E.Message{
 			ExtendedTextMessage: &waE2E.ExtendedTextMessage{
-				Text:         proto.String(msgText),
-				Title:        proto.String(urlTitle),
-				MatchedText:  proto.String(linkURL),
-				CanonicalURL: proto.String(linkURL),
-				Description:  proto.String(urlDescription),
+				Text:        proto.String(msgText),
+				Title:       proto.String(urlTitle),
+				MatchedText: proto.String(linkURL),
+				Description: proto.String(urlDescription),
 			},
 		}
 
