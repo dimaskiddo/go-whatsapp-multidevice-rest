@@ -18,5 +18,5 @@ services:
     env_file:
       - ./.env
     volumes:
-      - ./dbs:/usr/app/qowam-rest/dbs
+      - ./dbs:/usr/app/gowam-rest/dbs
     restart: unless-stopped
