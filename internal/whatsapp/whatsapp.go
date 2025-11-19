@@ -173,7 +173,7 @@ func Registered(c echo.Context) error {
 		return router.ResponseInternalError(c, "Missing Query Value MSISDN")
 	}
 
-	err := pkgWhatsApp.WhatsAppCheckRegistered(jid, remoteJID)
+	err := pkgWhatsApp.WhatsAppCheckRegistered(c.Request().Context(), jid, remoteJID)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -193,7 +193,7 @@ func GetGroup(c echo.Context) error {
 	var err error
 	jid := jwtPayload(c).JID
 
-	group, err := pkgWhatsApp.WhatsAppGroupGet(jid)
+	group, err := pkgWhatsApp.WhatsAppGroupGet(c.Request().Context(), jid)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -221,7 +221,7 @@ func JoinGroup(c echo.Context) error {
 		return router.ResponseBadRequest(c, "Missing Form Value Link")
 	}
 
-	group, err := pkgWhatsApp.WhatsAppGroupJoin(jid, reqGroupJoin.Link)
+	group, err := pkgWhatsApp.WhatsAppGroupJoin(c.Request().Context(), jid, reqGroupJoin.Link)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
@@ -249,7 +249,7 @@ func LeaveGroup(c echo.Context) error {
 		return router.ResponseBadRequest(c, "Missing Form Value Group ID")
 	}
 
-	err = pkgWhatsApp.WhatsAppGroupLeave(jid, reqGroupLeave.GID)
+	err = pkgWhatsApp.WhatsAppGroupLeave(c.Request().Context(), jid, reqGroupLeave.GID)
 	if err != nil {
 		return router.ResponseInternalError(c, err.Error())
 	}
