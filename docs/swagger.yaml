@@ -14,7 +14,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       summary: Show The Status of The Server
       tags:
       - Root
@@ -25,7 +25,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BasicAuth: []
       summary: Generate Authentication Token
@@ -38,10 +38,29 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Get Joined Groups Information
+      tags:
+      - WhatsApp Group
+  /group/{groupId}:
+    get:
+      description: Get Detailed Group Information by Group ID from WhatsApp
+      parameters:
+      - description: Group ID (e.g. 1234567890-1234567890@g.us)
+        in: path
+        name: groupId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      security:
+      - BearerAuth: []
+      summary: Get Group Information by Group ID
       tags:
       - WhatsApp Group
   /group/join:
@@ -57,7 +76,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Join Group From Invitation Link
@@ -76,7 +95,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Leave Group By Group ID
@@ -101,7 +120,7 @@ paths:
       - text/html
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Generate QR Code for WhatsApp Multi-Device Login
@@ -116,7 +135,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Pair Phone for WhatsApp Multi-Device Login
@@ -129,7 +148,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Logout Device from WhatsApp Multi-Device
@@ -155,7 +174,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Delete Message
@@ -186,7 +205,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Update Message
@@ -217,7 +236,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: React Message
@@ -236,7 +255,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Check If WhatsApp Personal ID is Registered
@@ -262,7 +281,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Audio Message
@@ -294,7 +313,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Contact Message
@@ -317,11 +336,15 @@ paths:
         name: document
         required: true
         type: file
+      - description: Caption Document Message
+        in: formData
+        name: caption
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Document Message
@@ -357,7 +380,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Image Message
@@ -387,7 +410,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Link Message
@@ -419,7 +442,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Location Message
@@ -455,7 +478,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Poll
@@ -482,7 +505,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Sticker Message
@@ -508,7 +531,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Text Message
@@ -544,7 +567,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: ""
+          description: OK
       security:
       - BearerAuth: []
       summary: Send Video Message

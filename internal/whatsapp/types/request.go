@@ -50,3 +50,9 @@ type RequestGroupJoin struct {
 type RequestGroupLeave struct {
 	GID string
 }
+
+type RequestSendTyping struct {
+	RJID        string
+	IsComposing bool
+	IsAudio     bool
+}

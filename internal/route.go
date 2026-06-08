@@ -8,6 +8,7 @@ import (
 
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/docs"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/auth"
+	mediapkg "github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/media"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 
 	ctlAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth"
@@ -25,6 +26,15 @@ func Routes(e *echo.Echo) {
 	// ---------------------------------------------
 	e.GET(router.BaseURL, ctlIndex.Index)
 	e.GET(router.BaseURL+"/", ctlIndex.Index)
+
+	// Route for Media (local storage only)
+	// ---------------------------------------------
+	if mediapkg.StorageType == "local" {
+		localDir := mediapkg.LocalDir()
+		if localDir != "" {
+			e.Static(router.BaseURL+"/media", localDir)
+		}
+	}
 
 	// Route for OpenAPI / Swagger
 	// ---------------------------------------------
@@ -48,6 +58,7 @@ func Routes(e *echo.Echo) {
 	e.GET(router.BaseURL+"/registered", ctlWhatsApp.Registered, middleware.JWTWithConfig(authJWTConfig))
 
 	e.GET(router.BaseURL+"/group", ctlWhatsApp.GetGroup, middleware.JWTWithConfig(authJWTConfig))
+	e.GET(router.BaseURL+"/group/:groupId", ctlWhatsApp.GetGroupInfo, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/group/join", ctlWhatsApp.JoinGroup, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/group/leave", ctlWhatsApp.LeaveGroup, middleware.JWTWithConfig(authJWTConfig))
 
@@ -61,6 +72,7 @@ func Routes(e *echo.Echo) {
 	e.POST(router.BaseURL+"/send/video", ctlWhatsApp.SendVideo, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/send/sticker", ctlWhatsApp.SendSticker, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/send/poll", ctlWhatsApp.SendPoll, middleware.JWTWithConfig(authJWTConfig))
+	e.POST(router.BaseURL+"/send/typing", ctlWhatsApp.SendTyping, middleware.JWTWithConfig(authJWTConfig))
 
 	e.POST(router.BaseURL+"/message/edit", ctlWhatsApp.MessageEdit, middleware.JWTWithConfig(authJWTConfig))
 	e.POST(router.BaseURL+"/message/react", ctlWhatsApp.MessageEdit, middleware.JWTWithConfig(authJWTConfig))

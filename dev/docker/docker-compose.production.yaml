@@ -1,0 +1,22 @@
+x-app: &whatsapp-rest
+  build:
+    context: ../..
+    dockerfile: ./misc/docker/Dockerfile
+  image: 'ilhamfadhilah/whatsapp-rest:local'
+  depends_on:
+    - postgres
+  env_file:
+    - ./.env
+    - ./.env.docker
+  volumes:
+    - ./volumes/dbs:/usr/app/go-whatsapp-multidevice-rest/dbs
+
+services:
+  whatsapp-rest-1:
+    <<: *whatsapp-rest
+
+  # whatsapp-rest-2:
+  #   <<: *whatsapp-rest
+
+  # whatsapp-rest-3:
+  #   <<: *whatsapp-rest

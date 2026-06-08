@@ -1,0 +1,75 @@
+x-app: &whatsapp-rest
+  depends_on:
+    - postgres
+
+services:
+  whatsapp-rest-1:
+    <<: *whatsapp-rest
+
+  # whatsapp-rest-2:
+  #   <<: *whatsapp-rest
+
+  # whatsapp-rest-3:
+  #   <<: *whatsapp-rest
+
+  postgres:
+    image: postgres:16.2
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - './volumes/postgres:/var/lib/postgresql/data'
+    ports:
+      - "0.0.0.0:5432:5432"
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres -d postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      default:
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - '8888:80'
+    depends_on:
+      - postgres
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@test.net
+      PGADMIN_DEFAULT_PASSWORD: 123456
+    volumes:
+      - ./volumes/pgadmin:/var/lib/pgadmin
+    networks:
+      default:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "1321:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - whatsapp-rest-1
+      # - whatsapp-rest-2
+      # - whatsapp-rest-3
+  webhook-tester:
+    image: tarampampam/webhook-tester
+    command: serve --port 8080 --storage-driver redis --pubsub-driver redis --redis-dsn redis://redis:6379/0
+    ports:
+      - 8080:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - ./volumes/redis:/data
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 1s

@@ -1,0 +1,20 @@
+x-app: &whatsapp-rest
+  image: 'cosmtrek/air:v1.61.7'
+  # entrypoint: ['tail', '-f', '/dev/null']
+  command: ['-c', '/app/src/misc/docker/air/.air.toml']
+  depends_on:
+    - postgres
+  volumes:
+    - ../../:/app/src
+    - ./.env:/app/src/.env
+    - ./volumes/dbs:/app/src/dbs
+
+services:
+  whatsapp-rest-1:
+    <<: *whatsapp-rest
+
+  # whatsapp-rest-2:
+  #   <<: *whatsapp-rest
+
+  # whatsapp-rest-3:
+  #   <<: *whatsapp-rest

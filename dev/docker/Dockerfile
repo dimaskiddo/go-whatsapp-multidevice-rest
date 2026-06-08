@@ -28,7 +28,5 @@ RUN apk --no-cache --update upgrade \
 COPY --from=go-builder /usr/src/app/.env.example ./.env
 COPY --from=go-builder /usr/src/app/main ./gowam-rest
 
-EXPOSE 3000
-
 VOLUME ["/usr/app/${SERVICE_NAME}/dbs"]
 CMD ["gowam-rest"]

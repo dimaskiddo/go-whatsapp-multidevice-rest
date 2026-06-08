@@ -99,9 +99,9 @@ make vendor
 
 5) Link or copy environment variables file
 ```sh
-ln -sf .env.development .env
+ln -sf .env.example .env
 # - OR -
-cp .env.development .env
+cp .env.example .env
 ```
 
 6) Until this step you already can run this code by using this command

@@ -4,9 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -28,7 +31,9 @@ import (
 	"go.mau.fi/whatsmeow/store"
 	"go.mau.fi/whatsmeow/store/sqlstore"
 	"go.mau.fi/whatsmeow/types"
+	"go.mau.fi/whatsmeow/types/events"
 
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/app"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/env"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 )
@@ -106,6 +111,12 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 
 		// Set WhatsApp Client Auto Trust Identity
 		WhatsAppClient[jid].AutoTrustIdentity = true
+
+		// Set WhatsApp Client Event Handler
+		client := WhatsAppClient[jid]
+		WhatsAppClient[jid].AddEventHandler(func(evt interface{}) {
+			whatsAppEventHandler(client, evt)
+		})
 	}
 }
 
@@ -427,6 +438,44 @@ func WhatsAppComposeStatus(jid string, rjid types.JID, isComposing bool, isAudio
 
 	// Send Chat Compose Status
 	_ = WhatsAppClient[jid].SendChatPresence(context.Background(), rjid, typeCompose, typeComposeMedia)
+}
+
+// WhatsAppSendTyping sends a composing (typing / recording) or paused chat
+// presence to a personal or group JID.  It is the public counterpart to the
+// internal WhatsAppComposeStatus helper that is normally used only during
+// message-send operations.
+func WhatsAppSendTyping(jid string, rjid string, isComposing bool, isAudio bool) error {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return err
+		}
+
+		// Make Sure WhatsApp ID is Registered
+		remoteJID, err := WhatsAppCheckJID(jid, rjid)
+		if err != nil {
+			return err
+		}
+
+		// Mark ourselves as available while the status is active
+		WhatsAppPresence(jid, true)
+
+		// Send composing / paused chat presence
+		WhatsAppComposeStatus(jid, remoteJID, isComposing, isAudio)
+
+		// When clearing the typing indicator, also mark presence as unavailable
+		if !isComposing {
+			WhatsAppPresence(jid, false)
+		}
+
+		return nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return errors.New("WhatsApp Client is not Valid")
 }
 
 func WhatsAppCheckRegistered(jid string, id string) error {
@@ -1294,6 +1343,40 @@ func WhatsAppGroupGet(jid string) ([]types.GroupInfo, error) {
 	return nil, errors.New("WhatsApp Client is not Valid")
 }
 
+func WhatsAppGroupGetInfo(jid string, gjid string) (*types.GroupInfo, error) {
+	if WhatsAppClient[jid] != nil {
+		var err error
+
+		// Make Sure WhatsApp Client is OK
+		err = WhatsAppIsClientOK(jid)
+		if err != nil {
+			return nil, err
+		}
+
+		// Parse Group JID
+		groupJID, err := WhatsAppCheckJID(jid, gjid)
+		if err != nil {
+			return nil, err
+		}
+
+		// Make Sure WhatsApp ID is Group Server
+		if groupJID.Server != types.GroupServer {
+			return nil, errors.New("WhatsApp Group ID is Not Group Server")
+		}
+
+		// Get Group Info
+		groupInfo, err := WhatsAppClient[jid].GetGroupInfo(context.Background(), groupJID)
+		if err != nil {
+			return nil, err
+		}
+
+		return groupInfo, nil
+	}
+
+	// Return Error WhatsApp Client is not Valid
+	return nil, errors.New("WhatsApp Client is not Valid")
+}
+
 func WhatsAppGroupJoin(jid string, link string) (string, error) {
 	if WhatsAppClient[jid] != nil {
 		var err error
@@ -1345,4 +1428,112 @@ func WhatsAppGroupLeave(jid string, gjid string) error {
 
 	// Return Error WhatsApp Client is not Valid
 	return errors.New("WhatsApp Client is not Valid")
+}
+
+func whatsAppEventHandler(client *whatsmeow.Client, evt interface{}) {
+	var payload *WebhookPayload
+
+	switch v := evt.(type) {
+	case *events.Message:
+		msg := v.Message
+		if msg == nil || msg.GetProtocolMessage() != nil || msg.GetSenderKeyDistributionMessage() != nil {
+			return
+		}
+		p := buildMessagePayload(client, v)
+		payload = &p
+	case *events.Receipt:
+		p := buildReceiptPayload(v)
+		payload = &p
+	case *events.ChatPresence:
+		p := buildChatPresencePayload(v)
+		payload = &p
+	case *events.Presence:
+		p := buildPresencePayload(v)
+		payload = &p
+	case *events.GroupInfo:
+		p := buildGroupInfoPayload(v)
+		payload = &p
+	case *events.JoinedGroup:
+		p := buildJoinedGroupPayload(v)
+		payload = &p
+	case *events.Picture:
+		p := buildPicturePayload(v)
+		payload = &p
+	case *events.Connected:
+		p := buildConnectedPayload()
+		payload = &p
+	case *events.Disconnected:
+		p := buildDisconnectedPayload()
+		payload = &p
+	case *events.LoggedOut:
+		p := buildLoggedOutPayload(v)
+		payload = &p
+		// The device was removed remotely (e.g. logged out from the phone).
+		// whatsmeow has already deleted the store record, so we must remove
+		// the stale client from the map to prevent "invalid use of deleted device".
+		if client != nil && client.Store != nil && client.Store.ID != nil {
+			jid := client.Store.ID.User
+			client.Disconnect()
+			WhatsAppClient[jid] = nil
+			delete(WhatsAppClient, jid)
+		}
+	case *events.CallOffer:
+		p := buildCallOfferPayload(v)
+		payload = &p
+	case *events.CallTerminate:
+		p := buildCallTerminatePayload(v)
+		payload = &p
+	case *events.CallReject:
+		p := buildCallRejectPayload(v)
+		payload = &p
+	}
+
+	if payload != nil {
+		if client != nil && client.Store != nil && client.Store.ID != nil {
+			payload.Phone = client.Store.ID.User
+		}
+		webhookDebugSave(evt, payload)
+		if len(app.AppWebhookEvents) == 0 || app.AppWebhookEvents[payload.Event] {
+			app.AppRequest.Post(app.AppWebhookURL, payload)
+		}
+	}
+}
+
+// webhookDebugEnvelope is the structure saved to disk when WEBHOOK_DEBUG=true.
+type webhookDebugEnvelope struct {
+	Raw       interface{}     `json:"raw"`
+	Processed *WebhookPayload `json:"processed"`
+}
+
+// webhookDebugSave writes both the raw whatsmeow event and the processed
+// WebhookPayload as an indented JSON file when WEBHOOK_DEBUG=true.
+// Files land in WEBHOOK_DEBUG_DIR (default: ./tmp/webhook-debug/).
+// Each file is named "<unix-nano>_<event>.json" so nothing is ever overwritten.
+func webhookDebugSave(raw interface{}, payload *WebhookPayload) {
+	enabled, err := env.GetEnvBool("WEBHOOK_DEBUG")
+	if err != nil || !enabled {
+		return
+	}
+
+	dir, err := env.GetEnvString("WEBHOOK_DEBUG_DIR")
+	if err != nil || strings.TrimSpace(dir) == "" {
+		dir = "./tmp/webhook-debug"
+	}
+
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return
+	}
+
+	envelope := webhookDebugEnvelope{
+		Raw:       raw,
+		Processed: payload,
+	}
+
+	data, err := json.MarshalIndent(envelope, "", "  ")
+	if err != nil {
+		return
+	}
+
+	filename := fmt.Sprintf("%d_%s.json", time.Now().UnixNano(), payload.Event)
+	_ = os.WriteFile(filepath.Join(dir, filename), data, 0644)
 }

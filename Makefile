@@ -43,6 +43,10 @@ run:
 	make vendor
 	go run cmd/main/*.go
 
+run-dev:
+	make vendor
+	air -c .air.toml || echo "Please ensure 'air' is installed and '.air.toml' exists."
+
 gen-docs:
 	rm -rf docs/*
 	swag init -g cmd/main/main.go --output docs
