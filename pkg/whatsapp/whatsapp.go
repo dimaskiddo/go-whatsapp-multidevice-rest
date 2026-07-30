@@ -76,7 +76,8 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 		// Set Client Properties
 		store.DeviceProps.Os = proto.String(WhatsAppGetUserOS())
 		store.DeviceProps.PlatformType = WhatsAppGetUserAgent("chrome").Enum()
-		store.DeviceProps.RequireFullSync = proto.Bool(false)
+		// Enable full history sync from primary device — critical for proper web client behavior
+		store.DeviceProps.RequireFullSync = proto.Bool(true)
 
 		// Set Client Versions
 		version.Major, err = env.GetEnvInt("WHATSAPP_VERSION_MAJOR")
@@ -106,6 +107,13 @@ func WhatsAppInitClient(device *store.Device, jid string) {
 
 		// Set WhatsApp Client Auto Trust Identity
 		WhatsAppClient[jid].AutoTrustIdentity = true
+
+		// Register event handlers for processing incoming messages, history sync,
+		// connection state changes, and more. This is REQUIRED for WhatsApp to
+		// consider this client as a proper web client.
+		WhatsAppRegisterEventHandler(jid)
+
+		log.Print(nil).Infof("[%s] WhatsApp client initialized with event handlers", maskJID(jid))
 	}
 }
 
@@ -329,13 +337,58 @@ func WhatsAppIsClientOK(jid string) error {
 	return nil
 }
 
+// WhatsAppCheckAllConnections iterates all clients and verifies their connection health.
+// Returns a list of JIDs where reconnection failed.
+func WhatsAppCheckAllConnections() []string {
+	var failedJIDs []string
+
+	for jid, client := range WhatsAppClient {
+		if client == nil {
+			continue
+		}
+
+		isConnected := client.IsConnected()
+		isLoggedIn := client.IsLoggedIn()
+
+		maskedJID := maskJID(jid)
+
+		if !isConnected && isLoggedIn {
+			// Client has session but disconnected — attempt reconnection
+			log.Print(nil).Warnf("[%s] Client disconnected, attempting auto-reconnect...", maskedJID)
+			err := WhatsAppReconnect(jid)
+			if err != nil {
+				log.Print(nil).Errorf("[%s] Auto-reconnect failed: %v", maskedJID, err)
+				failedJIDs = append(failedJIDs, jid)
+			} else {
+				log.Print(nil).Infof("[%s] Auto-reconnect successful", maskedJID)
+			}
+		} else if !isConnected && !isLoggedIn {
+			// Client has no session and is not connected — needs manual login
+			log.Print(nil).Warnf("[%s] Client not connected and not logged in", maskedJID)
+		} else if isConnected && !isLoggedIn {
+			// Rare state: connected but not logged in
+			log.Print(nil).Warnf("[%s] Client connected but not logged in", maskedJID)
+		} else {
+			log.Print(nil).Debugf("[%s] Client health OK (connected, logged in)", maskedJID)
+		}
+	}
+
+	return failedJIDs
+}
+
+// WhatsAppIsClientInMap checks if a client exists in the map for the given JID
+func WhatsAppIsClientInMap(jid string) bool {
+	_, exists := WhatsAppClient[jid]
+	return exists
+}
+
 func WhatsAppGetJID(jid string, id string) types.JID {
 	if WhatsAppClient[jid] != nil {
 		var ids []string
 
 		ids = append(ids, "+"+id)
 		infos, err := WhatsAppClient[jid].IsOnWhatsApp(context.Background(), ids)
-		if err == nil {
+		if err == nil && len(infos) > 0 {
 			// If WhatsApp ID is Registered Then
 			// Return ID Information
 			if infos[0].IsIn {

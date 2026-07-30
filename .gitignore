@@ -5,3 +5,6 @@ dbs/*
 .env
 *.DS_Store
 !*.gitkeep
+AGENTS.md
+go-whatsapp-multidevice-rest
+walang.go.txt

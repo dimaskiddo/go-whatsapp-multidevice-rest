@@ -1,6 +1,9 @@
 package internal
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -8,6 +11,7 @@ import (
 
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/docs"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/auth"
+	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/log"
 	"github.com/dimaskiddo/go-whatsapp-multidevice-rest/pkg/router"
 
 	ctlAuth "github.com/dimaskiddo/go-whatsapp-multidevice-rest/internal/auth"
@@ -39,6 +43,24 @@ func Routes(e *echo.Echo) {
 	authJWTConfig := middleware.JWTConfig{
 		Claims:     &typAuth.AuthJWTClaims{},
 		SigningKey: []byte(auth.AuthJWTSecret),
+		ErrorHandlerWithContext: func(err error, c echo.Context) error {
+			// Log incoming Authorization header for debugging
+			authHeader := c.Request().Header.Get("Authorization")
+			if authHeader != "" {
+				// Mask token: show only first 20 chars
+				masked := authHeader
+				if len(authHeader) > 20 {
+					masked = authHeader[:20] + "..."
+				}
+				log.Print(c).Error(fmt.Sprintf("JWT Auth Failed - AuthHeader: %s - Error: %v", masked, err))
+			} else {
+				log.Print(c).Error(fmt.Sprintf("JWT Auth Failed - No Authorization Header - Error: %v", err))
+			}
+			return &echo.HTTPError{
+				Code:    http.StatusUnauthorized,
+				Message: fmt.Sprintf("invalid or expired jwt: %v", err),
+			}
+		},
 	}
 
 	e.POST(router.BaseURL+"/login", ctlWhatsApp.Login, middleware.JWTWithConfig(authJWTConfig))

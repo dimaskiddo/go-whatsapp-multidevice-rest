@@ -13,8 +13,12 @@ func Routines(cron *cron.Cron) {
 	cron.AddFunc("0 * * * * *", func() {
 		// If WhatsAppClient Connection is more than 0
 		if len(pkgWhatsApp.WhatsAppClient) > 0 {
-			// Check Every Authenticated MSISDN
+			// Check Every Authenticated JID
 			for jid, client := range pkgWhatsApp.WhatsAppClient {
+				if client == nil || client.Store == nil || client.Store.ID == nil {
+					continue
+				}
+
 				// Get Real JID from Datastore
 				realJID := client.Store.ID.User
 
@@ -32,7 +36,38 @@ func Routines(cron *cron.Cron) {
 					// Logout WhatsAppClient Device
 					_ = pkgWhatsApp.WhatsAppLogout(jid)
 					delete(pkgWhatsApp.WhatsAppClient, jid)
+					continue
 				}
+
+				// Connection health check
+				isConnected := client.IsConnected()
+				isLoggedIn := client.IsLoggedIn()
+
+				if !isConnected && isLoggedIn {
+					// Client has valid session but disconnected — try reconnecting
+					log.Print(nil).Warnf("[%s] Client disconnected, attempting auto-reconnect...", maskJID)
+					err := pkgWhatsApp.WhatsAppReconnect(jid)
+					if err != nil {
+						log.Print(nil).Errorf("[%s] Auto-reconnect failed: %v", maskJID, err)
+					} else {
+						log.Print(nil).Infof("[%s] Auto-reconnect successful", maskJID)
+					}
+				} else if !isConnected && !isLoggedIn {
+					log.Print(nil).Warnf("[%s] Client not connected and not logged in (needs manual re-login)", maskJID)
+				} else {
+					log.Print(nil).Debugf("[%s] Client health OK", maskJID)
+				}
+			}
+		}
+	})
+
+	// Additional health check every 30 seconds (on the 30s mark)
+	cron.AddFunc("30 * * * * *", func() {
+		if len(pkgWhatsApp.WhatsAppClient) > 0 {
+			log.Print(nil).Debug("Running connection health check for all clients...")
+			failedJIDs := pkgWhatsApp.WhatsAppCheckAllConnections()
+			if len(failedJIDs) > 0 {
+				log.Print(nil).Warnf("Health check: %d client(s) failed to reconnect", len(failedJIDs))
 			}
 		}
 	})
